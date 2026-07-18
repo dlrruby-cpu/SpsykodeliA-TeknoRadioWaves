@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>PsikodeliA TeknoRadio™ – Radio Techno Psicodélica</title>
+  <meta name="description" content="Radio Techno psicodélica con mezcla automática, visualizador en tiempo real y selector de modo Mix/Playlist.">
+  <meta name="keywords" content="radio techno, techno radio, mezcla automática, DJ online, playlist, mix, modo reproducción">
+  <meta name="author" content="DaløreXscripLab's">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://tu-dominio.com/">
+  <meta property="og:title" content="PsikodeliA TeknoRadio™ – Radio Techno Psicodélica">
+  <meta property="og:description" content="Mezcla automática de techno psicodélico. Elige entre Mix (2 min) o Playlist (temas completos).">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tu-dominio.com/">
+  <meta property="og:image" content="https://tu-dominio.com/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PsikodeliA TeknoRadio™ – Radio Techno Psicodélica">
+  <meta name="twitter:description" content="Mezcla automática de techno psicodélico. Elige entre Mix (2 min) o Playlist (temas completos).">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔮</text></svg>">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      width:100%; height:100%; overflow:hidden; background:#0a0a0a;
+      font-family:'Courier New', monospace;
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
+      background-image:radial-gradient(circle at 20% 20%, #1a1a1a 1px, transparent 1px);
+      background-size:30px 30px;
+    }
+    #psyCanvas {
+      position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;
+    }
+    .radio-body {
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10;
+      width:92vw; height:92vh; max-width:500px; max-height:750px;
+      background:linear-gradient(145deg, #2c2c2c, #1a1a1a);
+      border-radius:60px 60px 40px 40px;
+      box-shadow:
+        inset 0 0 30px rgba(0,0,0,0.9),
+        0 10px 30px rgba(0,0,0,0.8),
+        0 0 0 4px #3a3a3a,
+        0 0 0 8px #111,
+        0 0 0 12px #4a4a4a,
+        inset 0 0 100px rgba(0,0,0,0.5);
+      border:2px solid #555;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2vh;
+      padding:4vh 5vw 5vh; overflow:hidden;
+      animation:floatRadio 8s ease-in-out infinite;
+      background-image:
+        linear-gradient(145deg, #2c2c2c, #1a1a1a),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 6px),
+        radial-gradient(circle at 20% 30%, rgba(139,69,19,0.15) 2%, transparent 10%),
+        radial-gradient(circle at 80% 70%, rgba(255,140,0,0.1) 3%, transparent 15%);
+      background-blend-mode: overlay;
+    }
+    @keyframes floatRadio {
+      0%,100%{transform:translate(-50%,-50%) rotate(0deg)}
+      25%{transform:translate(-50%,-53%) rotate(0.5deg)}
+      75%{transform:translate(-50%,-47%) rotate(-0.5deg)}
+    }
+    .radio-body::before,.radio-body::after,
+    .rivet-bottom-left,.rivet-bottom-right {
+      content:''; position:absolute; width:12px; height:12px;
+      background:radial-gradient(circle, #888, #333); border-radius:50%;
+      box-shadow:inset 0 0 4px #000, 0 0 8px rgba(0,0,0,0.5); z-index:5;
+    }
+    .radio-body::before { top:15px; left:25px; }
+    .radio-body::after { top:15px; right:25px; }
+    .rivet-bottom-left { bottom:15px; left:25px; }
+    .rivet-bottom-right { bottom:15px; right:25px; }
+    .rust-effect {
+      position:absolute; pointer-events:none; z-index:2;
+      width:100%; height:100%; border-radius:inherit;
+      background:radial-gradient(circle at 30% 40%, rgba(210,105,30,0.2) 0%, transparent 50%),
+                 radial-gradient(circle at 70% 80%, rgba(255,140,0,0.15) 0%, transparent 40%);
+      mix-blend-mode:multiply;
+    }
+    .logo-top, .logo-bottom {
+      width:80%; max-height:12vh; display:flex; justify-content:center; align-items:center;
+    }
+    .logo-top img, .logo-bottom img {
+      max-width:100%; max-height:100%; object-fit:contain; border-radius:8px;
+    }
+    .logo-top img { filter:drop-shadow(0 0 8px #ff00ff); }
+    .logo-bottom img { filter:drop-shadow(0 0 8px #00ffff); }
+
+    /* ========== TEXTO GRABADO EN METAL ========== */
+    .brand-text {
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      letter-spacing: 4px;
+      text-align: center;
+      font-weight: bold;
+      color: #5a5a5a;
+      text-shadow:
+        -1px -1px 2px rgba(0,0,0,0.8),
+        1px 1px 2px rgba(255,255,255,0.15),
+        0 0 5px rgba(0,0,0,0.5);
+      transform: perspective(500px) rotateX(3deg);
+      margin-bottom: -1vh;
+    }
+
+    .display-screen {
+      width:85%; height:40%; max-height:240px;
+      background:linear-gradient(180deg, #0d1a0d 0%, #030703 100%);
+      border-radius:20px; border:3px solid #3a3a3a;
+      box-shadow:inset 0 0 30px #000000, 0 0 20px #ff00ff33;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      position:relative; overflow:hidden;
+    }
+
+    .visualizer-canvas {
+      width:100%; height:100%; border-radius:10px;
+      position: absolute; top:0; left:0;
+    }
+
+    .scrolling-message {
+      position: absolute;
+      bottom: 10%;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: clamp(0.7rem, 2.5vw, 1.1rem);
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+      letter-spacing: 2px;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+      z-index: 10;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .scrolling-message.visible {
+      opacity: 1;
+      animation: pulse-text 0.8s infinite alternate;
+    }
+
+    @keyframes pulse-text {
+      from { text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff; }
+      to { text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 60px #ff00ff; }
+    }
+
+    /* ========== SELECTORES DE MODO (INDUSTRIALES) ========== */
+    .mode-selectors {
+      display: flex;
+      gap: 1.5rem;
+      margin: 0.5vh 0;
+    }
+
+    .mode-btn {
+      background: linear-gradient(180deg, #3a3a3a 0%, #1f1f1f 100%);
+      border: 2px solid #555;
+      border-radius: 12px;
+      padding: 0.6rem 1.2rem;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      letter-spacing: 2px;
+      color: #888;
+      text-shadow: 0 1px 0 #00000088, 0 -1px 0 #ffffff22;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.8), 0 3px 6px rgba(0,0,0,0.6);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      outline: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+    }
+
+    .mode-btn.active {
+      color: #00ffff;
+      text-shadow: 0 0 12px #00ffff, 0 0 25px #00ffff;
+      border-color: #00ffff;
+      box-shadow: 0 0 15px #00ffff88, inset 0 0 8px #00ffff44;
+      background: linear-gradient(180deg, #2a3a3a 0%, #0f1f1f 100%);
+    }
+
+    .mode-btn:active {
+      transform: translateY(2px);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.9);
+    }
+
+    .hidden-track-count {
+      position:absolute; bottom:3%; right:5%;
+      color:rgba(255,255,255,0.08);
+      font-size:clamp(0.6rem, 1.8vw, 0.9rem);
+      font-weight:bold; pointer-events:none; z-index:15;
+    }
+
+    @media (max-width:400px){
+      .radio-body{width:96vw; height:96vh; border-radius:40px; padding:3vh 4vw}
+      .display-screen{height:45%}
+      .brand-text { font-size: clamp(1.2rem, 6vw, 2rem); }
+      .mode-btn { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
+    }
+    @media (min-width:768px){
+      .radio-body{width:450px; height:650px}
+      .display-screen{height:40%}
+    }
+  </style>
+</head>
+<body>
+  <canvas id="psyCanvas" aria-hidden="true"></canvas>
+
+  <div class="radio-body" role="application" aria-label="PsikodeliA TeknoRadio">
+    <div class="rust-effect"></div>
+    <div class="rivet-bottom-left"></div>
+    <div class="rivet-bottom-right"></div>
+
+    <div class="logo-top" id="logoTopContainer"></div>
+    <div class="brand-text" id="brandText">PsikodeliA TeknoRadio™</div>
+
+    <div class="display-screen">
+      <canvas class="visualizer-canvas" id="vizCanvas"></canvas>
+      <div class="scrolling-message" id="scrollingMessage"></div>
+    </div>
+
+    <!-- Selectores de modo -->
+    <div class="mode-selectors">
+      <button class="mode-btn active" id="btnMix" aria-label="Modo Mix (2 minutos)">MIX</button>
+      <button class="mode-btn" id="btnPlaylist" aria-label="Modo Playlist (temas completos)">PLAYLIST</button>
+    </div>
+
+    <div class="logo-bottom" id="logoBottomContainer"></div>
+    <div class="hidden-track-count" id="hiddenCount">0</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
