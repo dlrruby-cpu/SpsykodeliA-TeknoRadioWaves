@@ -1,9 +1,9 @@
 // ============ LISTA DE PISTAS LOCALES ============
 const LOCAL_TRACKS = [
-  "trackuno.mp3",
-  "trackdos.mp3",
-  "tracktres.mp3",
-  "trackcuatro.mp3"
+  "track1.mp3",
+  "track2.mp3",
+  "track3.mp3",
+  "track4.mp3"
 ];
 
 // ============ CONFIGURACIÓN (NO TOCAR) ============
