@@ -1,7 +1,7 @@
 (function() {
-  // ==================== CONFIGURACIÓN ====================
+  // ==================== CONFIGURACIÓN (¡AJUSTA ESTO!) ====================
   const TRACK_LIST = [
-    'tracks/pokaimix.mp3',
+    'tracks/tema1.mp3',
     'tracks/tema2.mp3',
     'tracks/tema3.mp3'
   ];
@@ -58,10 +58,9 @@
   let gainA, gainB, sourceA, sourceB, activeGain = 'A', masterGain, mixTimer;
   let analyser = null;
   let currentMode = 'mix'; // 'mix' o 'playlist'
-  // Parámetros por modo
   const MIX_SEGMENT = 120;
   const MIX_CROSSFADE = 15;
-  const PLAYLIST_CROSSFADE = 8; // segundos de mezcla entre temas completos
+  const PLAYLIST_CROSSFADE = 8;
 
   const vizCanvas = document.getElementById('vizCanvas');
   const ctxViz = vizCanvas.getContext('2d');
@@ -138,65 +137,36 @@
     if (mixTimer) clearTimeout(mixTimer);
   }
 
-  function getCurrentDeck() {
-    return activeGain === 'A' ? { source: sourceA, gain: gainA } : { source: sourceB, gain: gainB };
-  }
+  let deckA = { source: null, gain: null, startTime: 0, offset: 0, trackIdx: -1 };
+  let deckB = { source: null, gain: null, startTime: 0, offset: 0, trackIdx: -1 };
 
-  function getOtherDeck() {
-    return activeGain === 'A' ? { source: sourceB, gain: gainB } : { source: sourceA, gain: gainA };
-  }
-
-  // Programar siguiente transición según el modo actual
-  function scheduleNext() {
-    if (!isPlaying || tracks.length === 0) return;
-    if (mixTimer) clearTimeout(mixTimer);
-
-    const currentDeck = activeGain === 'A' ? deckA : deckB;
-    const currentTrack = tracks[currentIdx];
-    if (!currentTrack) return;
-
-    if (currentMode === 'mix') {
-      // Mix: 2 minutos fijos, crossfade a los 105s
-      const elapsed = audioCtx.currentTime - currentDeck.startTime + currentDeck.offset;
-      const remaining = MIX_SEGMENT - elapsed;
-      const waitTime = Math.max(0, remaining - MIX_CROSSFADE);
-      mixTimer = setTimeout(() => {
-        if (!isPlaying || currentMode !== 'mix') return;
-        transitionToNext();
-      }, waitTime * 1000);
-    } else { // playlist
-      const remainingFull = currentTrack.duration - (audioCtx.currentTime - currentDeck.startTime + currentDeck.offset);
-      const waitTime = Math.max(0.1, remainingFull - PLAYLIST_CROSSFADE);
-      mixTimer = setTimeout(() => {
-        if (!isPlaying || currentMode !== 'playlist') return;
-        transitionToNext();
-      }, waitTime * 1000);
-    }
+  function getCurrentDeckObj() {
+    return activeGain === 'A' ? deckA : deckB;
   }
 
   function transitionToNext() {
     if (!isPlaying || tracks.length === 0) return;
     const nextIdx = (currentIdx + 1) % tracks.length;
-    const otherDeck = activeGain === 'A' ? { gain: gainB, srcRef: 'sourceB' } : { gain: gainA, srcRef: 'sourceA' };
+    const otherGain = activeGain === 'A' ? gainB : gainA;
     const currentGain = activeGain === 'A' ? gainA : gainB;
 
-    // Detener el otro deck por si acaso
     stopSource(activeGain === 'A' ? sourceB : sourceA);
 
-    const result = playSegment(otherDeck.gain, nextIdx, 0, 0.001);
+    const result = playSegment(otherGain, nextIdx, 0, 0.001);
     if (result) {
       if (activeGain === 'A') {
         sourceB = result.source;
         activeGain = 'B';
+        deckB = { source: sourceB, gain: gainB, startTime: audioCtx.currentTime, offset: 0, trackIdx: nextIdx };
       } else {
         sourceA = result.source;
         activeGain = 'A';
+        deckA = { source: sourceA, gain: gainA, startTime: audioCtx.currentTime, offset: 0, trackIdx: nextIdx };
       }
       currentIdx = nextIdx;
 
       const crossfadeDuration = currentMode === 'mix' ? MIX_CROSSFADE : PLAYLIST_CROSSFADE;
-      crossfadeVolumes(currentGain, otherDeck.gain, crossfadeDuration);
-      // Programar la siguiente después de que empiece la nueva
+      crossfadeVolumes(currentGain, otherGain, crossfadeDuration);
       scheduleNext();
     }
   }
@@ -214,33 +184,26 @@
     gainNode.gain.cancelScheduledValues(now);
     gainNode.gain.setValueAtTime(initialVol, now);
 
-    // En modo playlist, dejar que suene hasta el final (no stop manual)
     if (currentMode === 'playlist') {
-      // No programamos stop, el source terminará naturalmente
-      // Pero por seguridad podemos añadir onended
       source.onended = () => {
-        // Si termina antes de la transición, forzar siguiente
-        if (isPlaying && currentIdx === trackIndex) {
+        if (isPlaying && currentIdx === trackIndex && (activeGain === 'A' ? sourceA : sourceB) === source) {
+          // Transición forzada si termina antes del crossfade programado
+          if (mixTimer) clearTimeout(mixTimer);
           transitionToNext();
         }
       };
     } else {
-      // Mix: parar tras 2 minutos
       const playDuration = Math.min(MIX_SEGMENT, track.duration - startOffset);
       source.stop(now + playDuration);
     }
 
-    // Guardar referencia del deck
     if (gainNode === gainA) {
-      deckA = { source, gain: gainA, startTime: now, offset: startOffset };
+      deckA = { source, gain: gainA, startTime: now, offset: startOffset, trackIdx: trackIndex };
     } else {
-      deckB = { source, gain: gainB, startTime: now, offset: startOffset };
+      deckB = { source, gain: gainB, startTime: now, offset: startOffset, trackIdx: trackIndex };
     }
-    return { source, gainNode };
+    return source;
   }
-
-  let deckA = { source: null, gain: gainA, startTime: 0, offset: 0 };
-  let deckB = { source: null, gain: gainB, startTime: 0, offset: 0 };
 
   function crossfadeVolumes(fromGain, toGain, duration) {
     const ac = getAC();
@@ -253,51 +216,66 @@
     toGain.gain.linearRampToValueAtTime(0.9, now + duration);
   }
 
+  function scheduleNext() {
+    if (!isPlaying || tracks.length === 0) return;
+    if (mixTimer) clearTimeout(mixTimer);
+
+    const currentDeck = getCurrentDeckObj();
+    const currentTrack = tracks[currentIdx];
+    if (!currentTrack || !currentDeck.source) return;
+
+    const elapsed = audioCtx.currentTime - currentDeck.startTime + currentDeck.offset;
+
+    if (currentMode === 'mix') {
+      const remaining = MIX_SEGMENT - elapsed;
+      const wait = Math.max(0, remaining - MIX_CROSSFADE);
+      mixTimer = setTimeout(() => {
+        if (!isPlaying || currentMode !== 'mix') return;
+        transitionToNext();
+      }, wait * 1000);
+    } else {
+      const remainingFull = currentTrack.duration - elapsed;
+      const wait = Math.max(0.1, remainingFull - PLAYLIST_CROSSFADE);
+      mixTimer = setTimeout(() => {
+        if (!isPlaying || currentMode !== 'playlist') return;
+        transitionToNext();
+      }, wait * 1000);
+    }
+  }
+
   function startRadio() {
     if (tracks.length === 0) return;
     getAC();
     setupMaster();
     stopAll();
     if (currentIdx < 0 || currentIdx >= tracks.length) currentIdx = 0;
-
-    // Iniciar en gainA
-    const result = playSegment(gainA, currentIdx, 0, 0.9);
-    if (result) {
-      sourceA = result.source;
+    const source = playSegment(gainA, currentIdx, 0, 0.9);
+    if (source) {
+      sourceA = source;
       activeGain = 'A';
+      deckA = { source: sourceA, gain: gainA, startTime: audioCtx.currentTime, offset: 0, trackIdx: currentIdx };
       isPlaying = true;
       scheduleNext();
       startMessageRotation();
     }
   }
 
-  // Cambiar de modo
+  // ==================== CAMBIO DE MODO ====================
   function switchMode(mode) {
     if (currentMode === mode) return;
     currentMode = mode;
-    // Actualizar botones
     btnMix.classList.toggle('active', mode === 'mix');
     btnPlaylist.classList.toggle('active', mode === 'playlist');
 
     if (isPlaying) {
-      // Recalcular transición inmediatamente
-      if (mixTimer) clearTimeout(mixTimer);
-      scheduleNext();
-      // Si estamos en playlist y el track actual ya ha sobrepasado los 2 minutos, podría estar detenido (mix), así que necesitamos reiniciar la reproducción del track actual desde el principio con el nuevo modo?
-      // Mejor: detener y volver a empezar el track actual en modo playlist desde el principio para evitar cortes.
-      // Simplificamos: reiniciamos la reproducción del track actual en el nuevo modo.
-      const currentTrack = tracks[currentIdx];
-      if (currentTrack) {
-        stopAll();
-        playSegment(gainA, currentIdx, 0, 0.9);
-        sourceA = ...; // reiniciamos deck A
-        activeGain = 'A';
-        scheduleNext();
-      }
+      // Reiniciar la reproducción actual en el nuevo modo desde el principio del track
+      stopAll();
+      const savedIdx = currentIdx;
+      currentIdx = savedIdx >= 0 ? savedIdx : 0;
+      startRadio();
     }
   }
 
-  // Al hacer clic en los botones
   btnMix.addEventListener('click', (e) => {
     e.stopPropagation();
     switchMode('mix');
@@ -331,6 +309,56 @@
     }, 15000);
   }
 
+  // ==================== MODAL LEGAL Y COOKIES ====================
+  const legalModal = document.getElementById('legalModal');
+  const cookieBanner = document.getElementById('cookieBanner');
+  const acceptCookiesBtn = document.getElementById('acceptCookiesBtn');
+  const moreInfoBtn = document.getElementById('moreInfoBtn');
+  const acceptLegalBtn = document.getElementById('acceptLegalBtn');
+
+  function hideCookieBanner() {
+    cookieBanner.style.display = 'none';
+  }
+
+  function showLegalModal() {
+    legalModal.classList.add('show');
+  }
+
+  function hideLegalModal() {
+    legalModal.classList.remove('show');
+  }
+
+  // Si ya aceptó cookies antes, ocultamos el banner
+  if (localStorage.getItem('cookiesAccepted')) {
+    hideCookieBanner();
+  }
+
+  acceptCookiesBtn.addEventListener('click', () => {
+    localStorage.setItem('cookiesAccepted', 'true');
+    hideCookieBanner();
+    // Al aceptar cookies, mostramos el modal legal una sola vez
+    if (!localStorage.getItem('legalAccepted')) {
+      showLegalModal();
+    }
+  });
+
+  moreInfoBtn.addEventListener('click', showLegalModal);
+
+  acceptLegalBtn.addEventListener('click', () => {
+    localStorage.setItem('legalAccepted', 'true');
+    hideLegalModal();
+    // Iniciar la radio después de aceptar (si no se había iniciado)
+    if (!hasStarted && tracks.length > 0) {
+      handleFirstTouch();
+    }
+  });
+
+  // Si ya aceptó legal, no mostrar modal
+  if (localStorage.getItem('legalAccepted')) {
+    hideLegalModal();
+  }
+
+  // ==================== INICIO CON PRIMER TOQUE ====================
   function handleFirstTouch() {
     if (hasStarted) return;
     getAC();
@@ -347,15 +375,24 @@
     }
   }
 
-  document.body.addEventListener('click', (e) => {
-    // No iniciar si se hace clic en los botones de modo
-    if (e.target === btnMix || e.target === btnPlaylist) return;
+  // Solo permitir inicio si se han aceptado cookies y legal
+  function conditionalStart(e) {
+    // Evitar que los botones de modo disparen el inicio
+    if (e && (e.target === btnMix || e.target === btnPlaylist)) return;
+    if (!localStorage.getItem('cookiesAccepted')) {
+      // Mostrar banner si no se ha aceptado
+      cookieBanner.style.display = 'flex';
+      return;
+    }
+    if (!localStorage.getItem('legalAccepted')) {
+      showLegalModal();
+      return;
+    }
     handleFirstTouch();
-  }, { once: true });
-  document.body.addEventListener('touchstart', (e) => {
-    if (e.target === btnMix || e.target === btnPlaylist) return;
-    handleFirstTouch();
-  }, { once: true });
+  }
+
+  document.body.addEventListener('click', conditionalStart, { once: true });
+  document.body.addEventListener('touchstart', conditionalStart, { once: true });
 
   // ==================== VISUALIZADOR ====================
   function drawVisualizer() {
