@@ -1,10 +1,7 @@
 (function() {
   // ==================== CONFIGURACIÓN (¡AJUSTA ESTO!) ====================
   const TRACK_LIST = [
-    'tracks/tema1.mp3',
-    'tracks/tema2.mp3',
-    'tracks/tema3.mp3'
-  ];
+    'tracks/pokaimix.mp3'];
 
   const LOGO_TOP_PATH = 'logo_top.png';
   const LOGO_BOTTOM_PATH = 'logo_bottom.png';
