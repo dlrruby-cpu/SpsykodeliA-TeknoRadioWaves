@@ -39,13 +39,13 @@
     .rivet-bottom-left { bottom:15px; left:25px; } .rivet-bottom-right { bottom:15px; right:25px; }
     .rust-effect { position:absolute; pointer-events:none; z-index:2; width:100%; height:100%; border-radius:inherit; background:radial-gradient(circle at 30% 40%, rgba(210,105,30,0.2) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(255,140,0,0.15) 0%, transparent 40%); mix-blend-mode:multiply; }
     .brand-text { font-size: clamp(1.5rem, 5vw, 2.5rem); letter-spacing:4px; text-align:center; font-weight:bold; color:#5a5a5a; text-shadow:-1px -1px 2px rgba(0,0,0,0.8), 1px 1px 2px rgba(255,255,255,0.15), 0 0 5px rgba(0,0,0,0.5); transform:perspective(500px) rotateX(3deg); margin-bottom:-1vh; }
-    .display-screen { width:85%; height:40%; max-height:240px; background:linear-gradient(180deg, #0d1a0d 0%, #030703 100%); border-radius:20px; border:3px solid #3a3a3a; box-shadow:inset 0 0 30px #000000, 0 0 20px #ff00ff33; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+    .display-screen { width:85%; height:40%; max-height:240px; background:linear-gradient(180deg, #0d1a0d 0%, #030703 100%); border-radius:20px; border:3px solid #3a3a3a; box-shadow:inset 0 0 30px #000000, 0 0 20px #ff00ff33; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden; cursor: pointer; }
     .visualizer-canvas { width:100%; height:100%; border-radius:10px; position:absolute; top:0; left:0; }
     .status-message { position:absolute; bottom:10%; left:0; width:100%; text-align:center; font-size:clamp(0.7rem, 2.5vw, 1rem); color:#ff00ff; text-shadow:0 0 10px #ff00ff; letter-spacing:2px; font-weight:bold; pointer-events:none; z-index:10; white-space:nowrap; overflow:hidden; }
-    .mode-selectors { display:flex; gap:1.5rem; margin:0.5vh 0; }
+    .mode-selectors { display:flex; gap:1.5rem; margin:0.5vh 0; z-index: 20; }
     .mode-btn { background:linear-gradient(180deg, #3a3a3a 0%, #1f1f1f 100%); border:2px solid #555; border-radius:12px; padding:0.6rem 1.2rem; font-family:'Courier New',monospace; font-weight:bold; font-size:clamp(0.8rem, 2.5vw, 1rem); letter-spacing:2px; color:#888; text-shadow:0 1px 0 #00000088, 0 -1px 0 #ffffff22; box-shadow:inset 0 2px 5px rgba(0,0,0,0.8), 0 3px 6px rgba(0,0,0,0.6); cursor:pointer; transition:all 0.2s ease; text-transform:uppercase; outline:none; user-select:none; -webkit-tap-highlight-color:transparent; }
     .mode-btn.active { color:#00ffff; text-shadow:0 0 12px #00ffff, 0 0 25px #00ffff; border-color:#00ffff; box-shadow:0 0 15px #00ffff88, inset 0 0 8px #00ffff44; background:linear-gradient(180deg, #2a3a3a 0%, #0f1f1f 100%); }
-    .paypal-btn { position:absolute; bottom:20px; left:20px; background:#ffc439; color:#000; font-weight:bold; padding:6px 15px; border-radius:20px; text-decoration:none; font-size:0.7rem; box-shadow:0 0 15px #ffc439; z-index:20; letter-spacing:1px; }
+    .paypal-btn { position:absolute; bottom:20px; left:20px; background:#ffc439; color:#000; font-weight:bold; padding:6px 15px; border-radius:20px; text-decoration:none; font-size:0.7rem; box-shadow:0 0 15px #ffc439; z-index:25; letter-spacing:1px; cursor: pointer; display: block !important; }
     .hidden-track-count { position:absolute; bottom:3%; right:5%; color:rgba(255,255,255,0.08); font-size:clamp(0.6rem, 1.8vw, 0.9rem); font-weight:bold; pointer-events:none; z-index:15; }
     .legal-modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:1000; display:flex; align-items:center; justify-content:center; color:#fff; }
     .legal-content { background:#1a1a1a; border:2px solid #ff00ff; border-radius:20px; padding:2rem; max-width:350px; text-align:center; font-family:'Courier New',monospace; }
@@ -59,16 +59,19 @@
 <body>
   <canvas id="psyCanvas" aria-hidden="true"></canvas>
 
+  <!-- Dos reproductores ocultos para hacer la mezcla automática (crossfade) -->
+  <audio id="playerA" preload="auto"></audio>
+  <audio id="playerB" preload="auto"></audio>
+
   <div class="radio-body" role="application" aria-label="PsikodeliA TeknoRadio">
     <div class="rust-effect"></div>
     <div class="rivet-bottom-left"></div>
     <div class="rivet-bottom-right"></div>
-    <div class="logo-top" id="logoTopContainer"></div>
     <div class="brand-text" id="brandText">PsikodeliA TeknoRadio™</div>
 
-    <div class="display-screen">
+    <div class="display-screen" id="screenBtn">
       <canvas class="visualizer-canvas" id="vizCanvas"></canvas>
-      <div class="status-message" id="statusMessage">TOCA PARA EMPEZAR</div>
+      <div class="status-message" id="statusMessage">ACEPTA LOS TÉRMINOS PRIMERO</div>
     </div>
 
     <div class="mode-selectors">
@@ -76,8 +79,8 @@
       <button class="mode-btn" id="btnPlaylist">PLAYLIST</button>
     </div>
 
+    <!-- Asegúrate de cambiar TU_ID_DE_BOTON por el tuyo real de PayPal -->
     <a class="paypal-btn" href="https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON" target="_blank" rel="noopener" aria-label="Donar con PayPal">💛 DONAR</a>
-    <div class="logo-bottom" id="logoBottomContainer"></div>
     <div class="hidden-track-count" id="hiddenCount">0</div>
   </div>
 
@@ -92,6 +95,186 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    // 1. LISTA DE TUS CANCIONES DESDE GITHUB
+    // Pon aquí las rutas relativas o absolutas de tus archivos .mp3 subidos a tu repositorio
+    const playlist = [
+      "audio/track1.mp3",
+      "audio/track2.mp3",
+      "audio/track3.mp3"
+    ];
+
+    let currentTrackIndex = 0;
+    let isPlaying = false;
+    let mixMode = "MIX"; // MIX o PLAYLIST
+
+    // Referencias del DOM
+    const legalModal = document.getElementById('legalModal');
+    const acceptLegalBtn = document.getElementById('acceptLegal');
+    const screenBtn = document.getElementById('screenBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const hiddenCount = document.getElementById('hiddenCount');
+    const btnMix = document.getElementById('btnMix');
+    const btnPlaylist = document.getElementById('btnPlaylist');
+
+    const playerA = document.getElementById('playerA');
+    const playerB = document.getElementById('playerB');
+    
+    let activePlayer = playerA;
+    let inactivePlayer = playerB;
+    let crossfadeInterval = null;
+
+    // Actualizar el contador de canciones en pantalla
+    hiddenCount.innerText = playlist.length;
+
+    // 2. LÓGICA DEL MODAL LEGAL
+    acceptLegalBtn.addEventListener('click', () => {
+      legalModal.style.display = 'none';
+      statusMessage.innerText = "TOCA PARA EMPEZAR";
+    });
+
+    // 3. CAMBIO DE MODOS (MIX / PLAYLIST)
+    btnMix.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mixMode = "MIX";
+      btnMix.classList.add('active');
+      btnPlaylist.classList.remove('active');
+    });
+
+    btnPlaylist.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mixMode = "PLAYLIST";
+      btnPlaylist.classList.add('active');
+      btnMix.classList.remove('active');
+    });
+
+    // 4. REPRODUCTOR Y MEZCLA AUTOMÁTICA (CROSSFADE)
+    function playTrack(index) {
+      if (playlist.length === 0) {
+        statusMessage.innerText = "NO HAY AUDIO";
+        return;
+      }
+
+      activePlayer.src = playlist[index];
+      activePlayer.volume = 1;
+      
+      activePlayer.play()
+        .then(() => {
+          isPlaying = true;
+          statusMessage.innerText = `REPRODUCIENDO PISTA ${index + 1}`;
+          setupCrossfadeCheck();
+        })
+        .catch(err => {
+          console.error("Error al reproducir:", err);
+          statusMessage.innerText = "ERROR DE CARGA";
+        });
+    }
+
+    function setupCrossfadeCheck() {
+      // Limpiamos intervalos previos
+      if (crossfadeInterval) clearInterval(crossfadeInterval);
+
+      crossfadeInterval = setInterval(() => {
+        // Si quedan menos de 10 segundos y estamos en modo MIX, iniciamos la mezcla
+        if (activePlayer.duration && (activePlayer.duration - activePlayer.currentTime <= 10)) {
+          clearInterval(crossfadeInterval);
+          
+          if (mixMode === "MIX") {
+            triggerCrossfade();
+          } else {
+            // Modo playlist clásico: Espera a que termine y salta
+            activePlayer.onended = () => {
+              nextTrack();
+            };
+          }
+        }
+      }, 1000);
+    }
+
+    function triggerCrossfade() {
+      // Calcular siguiente pista
+      currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+      
+      // Preparar el reproductor secundario
+      inactivePlayer.src = playlist[currentTrackIndex];
+      inactivePlayer.volume = 0;
+      
+      inactivePlayer.play().then(() => {
+        let fadeSteps = 20; 
+        let currentStep = 0;
+        
+        statusMessage.innerText = `MEZCLANDO PISTA ${currentTrackIndex + 1}`;
+
+        let fadeInterval = setInterval(() => {
+          currentStep++;
+          let ratio = currentStep / fadeSteps;
+
+          // El activo baja, el inactivo sube volumen
+          activePlayer.volume = Math.max(0, 1 - ratio);
+          inactivePlayer.volume = Math.min(1, ratio);
+
+          if (currentStep >= fadeSteps) {
+            clearInterval(fadeInterval);
+            
+            // Intercambiamos los roles de los reproductores
+            activePlayer.pause();
+            let temp = activePlayer;
+            activePlayer = inactivePlayer;
+            inactivePlayer = temp;
+
+            setupCrossfadeCheck();
+          }
+        }, 250); // 20 pasos cada 250ms = 5 segundos de fundido
+      }).catch(() => {
+        // Si falla, saltamos directo
+        nextTrack();
+      });
+    }
+
+    function nextTrack() {
+      currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+      playTrack(currentTrackIndex);
+    }
+
+    // Botón de play central (la pantalla)
+    screenBtn.addEventListener('click', () => {
+      if (legalModal.style.display !== 'none') return; // Bloquear si no aceptó legal
+
+      if (!isPlaying) {
+        playTrack(currentTrackIndex);
+      } else {
+        activePlayer.pause();
+        if (crossfadeInterval) clearInterval(crossfadeInterval);
+        isPlaying = false;
+        statusMessage.innerText = "PAUSA";
+      }
+    });
+
+    // 5. EFECTO VISUAL SIMULADO EN EL CANVAS
+    const canvas = document.getElementById('vizCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function drawVisualizer() {
+      requestAnimationFrame(drawVisualizer);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = isPlaying ? '#ff00ff' : '#333';
+      let bars = 30;
+      let barWidth = canvas.width / bars;
+      
+      for (let i = 0; i < bars; i++) {
+        // Altura aleatoria simulada si está sonando
+        let height = isPlaying ? Math.random() * (canvas.height * 0.6) : 5;
+        ctx.fillRect(i * barWidth, canvas.height - height, barWidth - 2, height);
+      }
+    }
+    drawVisualizer();
+  </script>
 </body>
 </html>
