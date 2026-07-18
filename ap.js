@@ -1,15 +1,16 @@
+// ============ LISTA DE PISTAS LOCALES ============
 const LOCAL_TRACKS = [
-  // "trackuno.mp3",
-  // "trackdos.mp3",
-  // "tracktres.mp3",
-  // "trackcuatro.mp3"
-  ];
-                            
+  "trackuno.mp3",
+  "trackdos.mp3",
+  "tracktres.mp3",
+  "trackcuatro.mp3"
+];
+
 // ============ CONFIGURACIÓN (NO TOCAR) ============
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 const LOGO_TOP_PATH = 'logo_top.png';
 const LOGO_BOTTOM_PATH = 'logo_bottom.png';
-const PAYPAL_URL = 'https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON'; // Cambia esto por tu enlace de PayPal
+const PAYPAL_URL = 'https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON';
 
 // ============ CANVAS DE FONDO ============
 const canvasBg = document.getElementById('psyCanvas'), ctxBg = canvasBg.getContext('2d');
@@ -97,7 +98,6 @@ async function initTracks() {
   if (tracks.length === 0) {
     statusMsg.textContent = 'ERROR: SIN PISTAS';
   } else {
-    // Si el aviso legal ya estaba aceptado previamente, ponemos el mensaje listo
     if (localStorage.getItem('legalAccepted') === 'true') {
       statusMsg.textContent = 'TOCA PARA EMPEZAR';
     } else {
@@ -140,7 +140,6 @@ function playSegment(gainNode, trackIndex, startOffset, initialVol) {
   } else {
     const playDuration=Math.min(MIX_SEGMENT, track.duration-startOffset);
     source.stop(now+playDuration);
-    // En modo MIX forzamos el cambio al terminar el segmento
     if (mixTimer) clearTimeout(mixTimer);
     const wait = Math.max(0, playDuration - MIX_CROSSFADE);
     mixTimer = setTimeout(() => { if (isPlaying && currentMode === 'mix') transitionToNext(); }, wait * 1000);
@@ -197,17 +196,14 @@ function switchMode(mode) {
 btnMix.addEventListener('click',(e)=>{ e.stopPropagation(); switchMode('mix'); });
 btnPlaylist.addEventListener('click',(e)=>{ e.stopPropagation(); switchMode('playlist'); });
 
-// Asignar url al botón de PayPal de forma segura
 const payBtn = document.querySelector('.paypal-btn');
 if(payBtn) payBtn.href = PAYPAL_URL;
 
 function handleFirstTouch(e) {
-  // Impedir que se active si se hace clic en el modal legal, botones de modo o paypal
   if (document.getElementById('legalModal').style.display !== 'none') return;
   if (e && (e.target === btnMix || e.target === btnPlaylist || e.target.closest('.paypal-btn'))) return;
-  
+
   if (hasStarted) {
-    // Si ya inició, este clic funciona como Play/Pausa alternado al tocar la pantalla central
     if(e.target.closest('.display-screen') || e.target.id === 'vizCanvas') {
       if(isPlaying) {
         stopAll();
@@ -219,7 +215,7 @@ function handleFirstTouch(e) {
     }
     return;
   }
-  
+
   getAC();
   hasStarted = true;
   if (tracks.length === 0) {
@@ -242,7 +238,7 @@ document.body.addEventListener('touchstart', handleFirstTouch);
     ctxViz.clearRect(0,0,w,h); const bars=32, barWidth=w/bars;
     for (let i=0;i<bars;i++) {
       const value=Math.sin(Date.now()*0.005+i*0.5)*0.5+0.5;
-      const barHeight=value*h*0.3; // Bajado un poco el tamaño en pausa para que sea estético
+      const barHeight=value*h*0.3;
       const hue=(Date.now()*0.1+i*10)%360;
       ctxViz.fillStyle=`hsla(${hue},100%,60%,0.4)`;
       ctxViz.fillRect(i*barWidth, h-barHeight, barWidth-1, barHeight);
@@ -285,7 +281,7 @@ async function loadLogo(path, containerId, hideBrand) {
     const blob=await resp.blob();
     const url=URL.createObjectURL(blob);
     const img=document.createElement('img'); img.src=url; img.alt='Logo';
-    img.style.maxHeight = "40px"; // Ajuste para evitar desbordamientos visuales
+    img.style.maxHeight = "40px";
     const target = document.getElementById(containerId);
     if(target) {
       target.innerHTML='';
@@ -306,7 +302,7 @@ if (localStorage.getItem('legalAccepted') === 'true') {
   legalModal.style.display = 'flex';
 }
 acceptBtn.addEventListener('click', (e) => {
-  e.stopPropagation(); // Evita disparar el inicio de la radio accidentalmente
+  e.stopPropagation();
   localStorage.setItem('legalAccepted', 'true');
   legalModal.style.display = 'none';
   if(statusMsg.textContent === 'ACEPTA LOS TÉRMINOS PRIMERO') {
