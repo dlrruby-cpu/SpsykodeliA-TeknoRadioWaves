@@ -53,21 +53,20 @@
     .legal-content p { font-size:0.8rem; margin:0.5rem 0; line-height:1.4; }
     .legal-content a { color:#00ffff; }
     .legal-btn { background:#ff00ff; border:none; color:#000; font-weight:bold; padding:0.7rem 2rem; border-radius:30px; cursor:pointer; margin-top:1rem; font-family:'Courier New',monospace; box-shadow:0 0 15px #ff00ff88; }
+    .logo-top-container { display:flex; align-items:center; justify-content:center; min-height:50px; }
+    .logo-bottom-container { position:absolute; bottom:20px; right:20px; z-index:25; display:flex; align-items:center; justify-content:center; }
     @media (max-width:400px) { .radio-body { width:96vw; height:96vh; border-radius:40px; padding:3vh 4vw; } .display-screen { height:45%; } .brand-text { font-size: clamp(1.2rem, 6vw, 2rem); } .mode-btn { padding: 0.4rem 0.8rem; font-size: 0.7rem; } }
   </style>
 </head>
 <body>
   <canvas id="psyCanvas" aria-hidden="true"></canvas>
 
-  <!-- Dos reproductores ocultos para hacer la mezcla automática (crossfade) -->
-  <audio id="playerA" preload="auto"></audio>
-  <audio id="playerB" preload="auto"></audio>
-
   <div class="radio-body" role="application" aria-label="PsikodeliA TeknoRadio">
     <div class="rust-effect"></div>
     <div class="rivet-bottom-left"></div>
     <div class="rivet-bottom-right"></div>
     <div class="brand-text" id="brandText">PsikodeliA TeknoRadio™</div>
+    <div id="logoTopContainer" class="logo-top-container"></div>
 
     <div class="display-screen" id="screenBtn">
       <canvas class="visualizer-canvas" id="vizCanvas"></canvas>
@@ -79,8 +78,8 @@
       <button class="mode-btn" id="btnPlaylist">PLAYLIST</button>
     </div>
 
-    <!-- Asegúrate de cambiar TU_ID_DE_BOTON por el tuyo real de PayPal -->
-    <a class="paypal-btn" href="dlrx75@gmail.com" target="_blank" rel="noopener" aria-label="Donar con PayPal">💛 DONAR</a>
+    <a class="paypal-btn" href="https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON" target="_blank" rel="noopener" aria-label="Donar con PayPal">💛 DONAR</a>
+    <div id="logoBottomContainer" class="logo-bottom-container"></div>
     <div class="hidden-track-count" id="hiddenCount">0</div>
   </div>
 
@@ -95,186 +94,6 @@
     </div>
   </div>
 
-  <script>
-    // 1. LISTA DE TUS CANCIONES DESDE GITHUB
-    // Pon aquí las rutas relativas o absolutas de tus archivos .mp3 subidos a tu repositorio
-    const playlist = [
-      "audio/track1.mp3",
-      "audio/track2.mp3",
-      "audio/track3.mp3"
-    ];
-
-    let currentTrackIndex = 0;
-    let isPlaying = false;
-    let mixMode = "MIX"; // MIX o PLAYLIST
-
-    // Referencias del DOM
-    const legalModal = document.getElementById('legalModal');
-    const acceptLegalBtn = document.getElementById('acceptLegal');
-    const screenBtn = document.getElementById('screenBtn');
-    const statusMessage = document.getElementById('statusMessage');
-    const hiddenCount = document.getElementById('hiddenCount');
-    const btnMix = document.getElementById('btnMix');
-    const btnPlaylist = document.getElementById('btnPlaylist');
-
-    const playerA = document.getElementById('playerA');
-    const playerB = document.getElementById('playerB');
-    
-    let activePlayer = playerA;
-    let inactivePlayer = playerB;
-    let crossfadeInterval = null;
-
-    // Actualizar el contador de canciones en pantalla
-    hiddenCount.innerText = playlist.length;
-
-    // 2. LÓGICA DEL MODAL LEGAL
-    acceptLegalBtn.addEventListener('click', () => {
-      legalModal.style.display = 'none';
-      statusMessage.innerText = "TOCA PARA EMPEZAR";
-    });
-
-    // 3. CAMBIO DE MODOS (MIX / PLAYLIST)
-    btnMix.addEventListener('click', (e) => {
-      e.stopPropagation();
-      mixMode = "MIX";
-      btnMix.classList.add('active');
-      btnPlaylist.classList.remove('active');
-    });
-
-    btnPlaylist.addEventListener('click', (e) => {
-      e.stopPropagation();
-      mixMode = "PLAYLIST";
-      btnPlaylist.classList.add('active');
-      btnMix.classList.remove('active');
-    });
-
-    // 4. REPRODUCTOR Y MEZCLA AUTOMÁTICA (CROSSFADE)
-    function playTrack(index) {
-      if (playlist.length === 0) {
-        statusMessage.innerText = "NO HAY AUDIO";
-        return;
-      }
-
-      activePlayer.src = playlist[index];
-      activePlayer.volume = 1;
-      
-      activePlayer.play()
-        .then(() => {
-          isPlaying = true;
-          statusMessage.innerText = `REPRODUCIENDO PISTA ${index + 1}`;
-          setupCrossfadeCheck();
-        })
-        .catch(err => {
-          console.error("Error al reproducir:", err);
-          statusMessage.innerText = "ERROR DE CARGA";
-        });
-    }
-
-    function setupCrossfadeCheck() {
-      // Limpiamos intervalos previos
-      if (crossfadeInterval) clearInterval(crossfadeInterval);
-
-      crossfadeInterval = setInterval(() => {
-        // Si quedan menos de 10 segundos y estamos en modo MIX, iniciamos la mezcla
-        if (activePlayer.duration && (activePlayer.duration - activePlayer.currentTime <= 10)) {
-          clearInterval(crossfadeInterval);
-          
-          if (mixMode === "MIX") {
-            triggerCrossfade();
-          } else {
-            // Modo playlist clásico: Espera a que termine y salta
-            activePlayer.onended = () => {
-              nextTrack();
-            };
-          }
-        }
-      }, 1000);
-    }
-
-    function triggerCrossfade() {
-      // Calcular siguiente pista
-      currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-      
-      // Preparar el reproductor secundario
-      inactivePlayer.src = playlist[currentTrackIndex];
-      inactivePlayer.volume = 0;
-      
-      inactivePlayer.play().then(() => {
-        let fadeSteps = 20; 
-        let currentStep = 0;
-        
-        statusMessage.innerText = `MEZCLANDO PISTA ${currentTrackIndex + 1}`;
-
-        let fadeInterval = setInterval(() => {
-          currentStep++;
-          let ratio = currentStep / fadeSteps;
-
-          // El activo baja, el inactivo sube volumen
-          activePlayer.volume = Math.max(0, 1 - ratio);
-          inactivePlayer.volume = Math.min(1, ratio);
-
-          if (currentStep >= fadeSteps) {
-            clearInterval(fadeInterval);
-            
-            // Intercambiamos los roles de los reproductores
-            activePlayer.pause();
-            let temp = activePlayer;
-            activePlayer = inactivePlayer;
-            inactivePlayer = temp;
-
-            setupCrossfadeCheck();
-          }
-        }, 250); // 20 pasos cada 250ms = 5 segundos de fundido
-      }).catch(() => {
-        // Si falla, saltamos directo
-        nextTrack();
-      });
-    }
-
-    function nextTrack() {
-      currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-      playTrack(currentTrackIndex);
-    }
-
-    // Botón de play central (la pantalla)
-    screenBtn.addEventListener('click', () => {
-      if (legalModal.style.display !== 'none') return; // Bloquear si no aceptó legal
-
-      if (!isPlaying) {
-        playTrack(currentTrackIndex);
-      } else {
-        activePlayer.pause();
-        if (crossfadeInterval) clearInterval(crossfadeInterval);
-        isPlaying = false;
-        statusMessage.innerText = "PAUSA";
-      }
-    });
-
-    // 5. EFECTO VISUAL SIMULADO EN EL CANVAS
-    const canvas = document.getElementById('vizCanvas');
-    const ctx = canvas.getContext('2d');
-    function resizeCanvas() {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    function drawVisualizer() {
-      requestAnimationFrame(drawVisualizer);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.fillStyle = isPlaying ? '#ff00ff' : '#333';
-      let bars = 30;
-      let barWidth = canvas.width / bars;
-      
-      for (let i = 0; i < bars; i++) {
-        // Altura aleatoria simulada si está sonando
-        let height = isPlaying ? Math.random() * (canvas.height * 0.6) : 5;
-        ctx.fillRect(i * barWidth, canvas.height - height, barWidth - 2, height);
-      }
-    }
-    drawVisualizer();
-  </script>
+  <script src="ap.js"></script>
 </body>
 </html>
