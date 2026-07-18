@@ -1,9 +1,11 @@
+// ============ LISTA DE CANCIONES (LOCALES / GITHUB) ============
 const LOCAL_TRACKS = [
-  // 'trackuno.mp3',
-  // 'trackdos.mp3',
- // 'tracktres.mp3',
- // 'trackcuatro.mp3'
-
+  // "trackuno.mp3",
+  // "trackdos.mp3",
+  // "tracktres.mp3",
+  // "trackcuatro.mp3"
+  ];
+                            
 // ============ CONFIGURACIÓN (NO TOCAR) ============
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 const LOGO_TOP_PATH = 'logo_top.png';
@@ -78,7 +80,7 @@ async function loadTracks(urlList) {
   for (const url of urlList) {
     try {
       const buffer=await loadBufferFromUrl(url);
-      const name=url.split('/').pop().replace(/\.[^/.]+$/, "");
+      const name = url.split('/').pop().replace(/\.[^/.]+$/, "").toUpperCase();
       tracks.push({name,url,duration:buffer.duration,buffer});
       console.log('✅ Cargada: '+name);
     } catch(e) { console.warn('❌ Falló: '+url, e.message); }
@@ -96,7 +98,12 @@ async function initTracks() {
   if (tracks.length === 0) {
     statusMsg.textContent = 'ERROR: SIN PISTAS';
   } else {
-    statusMsg.textContent = tracks.length + ' PISTAS LISTAS';
+    // Si el aviso legal ya estaba aceptado previamente, ponemos el mensaje listo
+    if (localStorage.getItem('legalAccepted') === 'true') {
+      statusMsg.textContent = 'TOCA PARA EMPEZAR';
+    } else {
+      statusMsg.textContent = 'ACEPTA LOS TÉRMINOS PRIMERO';
+    }
     if (hasStarted) startRadio();
   }
 }
@@ -134,6 +141,10 @@ function playSegment(gainNode, trackIndex, startOffset, initialVol) {
   } else {
     const playDuration=Math.min(MIX_SEGMENT, track.duration-startOffset);
     source.stop(now+playDuration);
+    // En modo MIX forzamos el cambio al terminar el segmento
+    if (mixTimer) clearTimeout(mixTimer);
+    const wait = Math.max(0, playDuration - MIX_CROSSFADE);
+    mixTimer = setTimeout(() => { if (isPlaying && currentMode === 'mix') transitionToNext(); }, wait * 1000);
   }
   return source;
 }
@@ -171,7 +182,7 @@ function startRadio() {
   const source=playSegment(gainA, currentIdx, 0, 0.9);
   if (source) {
     sourceA=source; activeGain='A'; deckA={source,gain:gainA,startTime:audioCtx.currentTime,offset:0};
-    isPlaying=true; scheduleNext();
+    isPlaying=true;
     statusMsg.textContent = tracks[currentIdx].name;
   }
 }
@@ -186,11 +197,30 @@ function switchMode(mode) {
 
 btnMix.addEventListener('click',(e)=>{ e.stopPropagation(); switchMode('mix'); });
 btnPlaylist.addEventListener('click',(e)=>{ e.stopPropagation(); switchMode('playlist'); });
-document.querySelector('.paypal-btn').href = PAYPAL_URL;
+
+// Asignar url al botón de PayPal de forma segura
+const payBtn = document.querySelector('.paypal-btn');
+if(payBtn) payBtn.href = PAYPAL_URL;
 
 function handleFirstTouch(e) {
-  if (hasStarted) return;
+  // Impedir que se active si se hace clic en el modal legal, botones de modo o paypal
+  if (document.getElementById('legalModal').style.display !== 'none') return;
   if (e && (e.target === btnMix || e.target === btnPlaylist || e.target.closest('.paypal-btn'))) return;
+  
+  if (hasStarted) {
+    // Si ya inició, este clic funciona como Play/Pausa alternado al tocar la pantalla central
+    if(e.target.closest('.display-screen') || e.target.id === 'vizCanvas') {
+      if(isPlaying) {
+        stopAll();
+        isPlaying = false;
+        statusMsg.textContent = 'PAUSA';
+      } else {
+        startRadio();
+      }
+    }
+    return;
+  }
+  
   getAC();
   hasStarted = true;
   if (tracks.length === 0) {
@@ -213,9 +243,9 @@ document.body.addEventListener('touchstart', handleFirstTouch);
     ctxViz.clearRect(0,0,w,h); const bars=32, barWidth=w/bars;
     for (let i=0;i<bars;i++) {
       const value=Math.sin(Date.now()*0.005+i*0.5)*0.5+0.5;
-      const barHeight=value*h*0.8;
+      const barHeight=value*h*0.3; // Bajado un poco el tamaño en pausa para que sea estético
       const hue=(Date.now()*0.1+i*10)%360;
-      ctxViz.fillStyle=`hsla(${hue},100%,60%,0.8)`;
+      ctxViz.fillStyle=`hsla(${hue},100%,60%,0.4)`;
       ctxViz.fillRect(i*barWidth, h-barHeight, barWidth-1, barHeight);
     }
     return;
@@ -224,14 +254,14 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   const dataArray=new Uint8Array(bufferLength);
   analyser.getByteFrequencyData(dataArray);
   ctxViz.clearRect(0,0,w,h);
-  const centerX=w/2, centerY=h/2, radius=Math.min(w,h)*0.4;
+  const centerX=w/2, centerY=h/2, radius=Math.min(w,h)*0.25;
   const angleStep=(Math.PI*2)/bufferLength;
   ctxViz.beginPath();
   for (let i=0;i<bufferLength;i++) {
     const value=dataArray[i]/255;
     const angle=i*angleStep;
-    const x=centerX+Math.cos(angle)*radius*(0.5+value*0.5);
-    const y=centerY+Math.sin(angle)*radius*(0.5+value*0.5);
+    const x=centerX+Math.cos(angle)*radius*(1+value*0.6);
+    const y=centerY+Math.sin(angle)*radius*(1+value*0.6);
     i===0?ctxViz.moveTo(x,y):ctxViz.lineTo(x,y);
   }
   ctxViz.closePath();
@@ -256,9 +286,13 @@ async function loadLogo(path, containerId, hideBrand) {
     const blob=await resp.blob();
     const url=URL.createObjectURL(blob);
     const img=document.createElement('img'); img.src=url; img.alt='Logo';
-    document.getElementById(containerId).innerHTML='';
-    document.getElementById(containerId).appendChild(img);
-    if (hideBrand) document.getElementById('brandText').style.display='none';
+    img.style.maxHeight = "40px"; // Ajuste para evitar desbordamientos visuales
+    const target = document.getElementById(containerId);
+    if(target) {
+      target.innerHTML='';
+      target.appendChild(img);
+      if (hideBrand && document.getElementById('brandText')) document.getElementById('brandText').style.display='none';
+    }
   } catch(e) {}
 }
 loadLogo(LOGO_TOP_PATH, 'logoTopContainer', true);
@@ -272,9 +306,13 @@ if (localStorage.getItem('legalAccepted') === 'true') {
 } else {
   legalModal.style.display = 'flex';
 }
-acceptBtn.addEventListener('click', () => {
+acceptBtn.addEventListener('click', (e) => {
+  e.stopPropagation(); // Evita disparar el inicio de la radio accidentalmente
   localStorage.setItem('legalAccepted', 'true');
   legalModal.style.display = 'none';
+  if(statusMsg.textContent === 'ACEPTA LOS TÉRMINOS PRIMERO') {
+    statusMsg.textContent = 'TOCA PARA EMPEZAR';
+  }
 });
 
 // ============ INICIAR CARGA DE PISTAS ============
