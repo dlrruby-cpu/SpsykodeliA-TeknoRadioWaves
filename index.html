@@ -2,34 +2,24 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="<meta name="google-site-verification" content="8V-gKYRWj_yFyTHYSFIjJA9O9e6HpougdHP2nSG6DI8" />" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
   <title>PsikodeliA TeknoRadio™ – Radio Techno Psicodélica</title>
-  <meta name="description" content="Radio Techno psicodélica con mezcla automática y selector Mix/Playlist.">
-  <meta name="keywords" content="radio techno, mezcla automática, psicodelia">
+  <meta name="description" content="Radio Techno con carga automática de pistas desde la carpeta tracks.">
+  <meta name="keywords" content="radio techno, carga automática, DJ online">
   <meta name="author" content="DaløreXscripLab's">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://dlrruby-cpu.github.io/SpsykodeliA-TeknoRadioWaves/">
   <meta property="og:title" content="PsikodeliA TeknoRadio™">
-  <meta property="og:description" content="Mezcla automática de techno psicodélico.">
+  <meta property="og:description" content="Mezcla automática de techno. Sube tus pistas a tracks y suenan solas.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://dlrruby-cpu.github.io/SpsykodeliA-TeknoRadioWaves/">
   <meta property="og:image" content="https://dlrruby-cpu.github.io/SpsykodeliA-TeknoRadioWaves/og-image.jpg">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="PsikodeliA TeknoRadio™">
-  <meta name="twitter:description" content="Mezcla automática de techno psicodélico.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔮</text></svg>">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    html, body {
-      width:100%; height:100%; overflow:hidden; background:#0a0a0a;
-      font-family:'Courier New', monospace; touch-action:manipulation;
-      -webkit-tap-highlight-color:transparent; user-select:none;
-      background-image:radial-gradient(circle at 20% 20%, #1a1a1a 1px, transparent 1px);
-      background-size:30px 30px;
-    }
-    #psyCanvas {
-      position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;
-    }
+    html, body { width:100%; height:100%; overflow:hidden; background:#0a0a0a; font-family:'Courier New',monospace; touch-action:manipulation; -webkit-tap-highlight-color:transparent; user-select:none; background-image:radial-gradient(circle at 20% 20%, #1a1a1a 1px, transparent 1px); background-size:30px 30px; }
+    #psyCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
     .radio-body {
       position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10;
       width:92vw; height:92vh; max-width:500px; max-height:750px;
@@ -44,71 +34,20 @@
       background-blend-mode: overlay;
     }
     @keyframes floatRadio { 0%,100%{transform:translate(-50%,-50%) rotate(0deg)} 25%{transform:translate(-50%,-53%) rotate(0.5deg)} 75%{transform:translate(-50%,-47%) rotate(-0.5deg)} }
-    .radio-body::before,.radio-body::after,.rivet-bottom-left,.rivet-bottom-right {
-      content:''; position:absolute; width:12px; height:12px;
-      background:radial-gradient(circle, #888, #333); border-radius:50%;
-      box-shadow:inset 0 0 4px #000, 0 0 8px rgba(0,0,0,0.5); z-index:5;
-    }
-    .radio-body::before { top:15px; left:25px; }
-    .radio-body::after { top:15px; right:25px; }
-    .rivet-bottom-left { bottom:15px; left:25px; }
-    .rivet-bottom-right { bottom:15px; right:25px; }
-    .rust-effect {
-      position:absolute; pointer-events:none; z-index:2; width:100%; height:100%; border-radius:inherit;
-      background:radial-gradient(circle at 30% 40%, rgba(210,105,30,0.2) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(255,140,0,0.15) 0%, transparent 40%);
-      mix-blend-mode:multiply;
-    }
-    .logo-top, .logo-bottom { width:80%; max-height:12vh; display:flex; justify-content:center; align-items:center; }
-    .logo-top img, .logo-bottom img { max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; }
-    .logo-top img { filter:drop-shadow(0 0 8px #ff00ff); }
-    .logo-bottom img { filter:drop-shadow(0 0 8px #00ffff); }
-    .brand-text {
-      font-size: clamp(1.5rem, 5vw, 2.5rem); letter-spacing:4px; text-align:center; font-weight:bold;
-      color:#5a5a5a; text-shadow:-1px -1px 2px rgba(0,0,0,0.8), 1px 1px 2px rgba(255,255,255,0.15), 0 0 5px rgba(0,0,0,0.5);
-      transform:perspective(500px) rotateX(3deg); margin-bottom:-1vh;
-    }
-    .display-screen {
-      width:85%; height:40%; max-height:240px; background:linear-gradient(180deg, #0d1a0d 0%, #030703 100%);
-      border-radius:20px; border:3px solid #3a3a3a; box-shadow:inset 0 0 30px #000000, 0 0 20px #ff00ff33;
-      display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;
-    }
+    .radio-body::before,.radio-body::after,.rivet-bottom-left,.rivet-bottom-right { content:''; position:absolute; width:12px; height:12px; background:radial-gradient(circle, #888, #333); border-radius:50%; box-shadow:inset 0 0 4px #000, 0 0 8px rgba(0,0,0,0.5); z-index:5; }
+    .radio-body::before { top:15px; left:25px; } .radio-body::after { top:15px; right:25px; }
+    .rivet-bottom-left { bottom:15px; left:25px; } .rivet-bottom-right { bottom:15px; right:25px; }
+    .rust-effect { position:absolute; pointer-events:none; z-index:2; width:100%; height:100%; border-radius:inherit; background:radial-gradient(circle at 30% 40%, rgba(210,105,30,0.2) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(255,140,0,0.15) 0%, transparent 40%); mix-blend-mode:multiply; }
+    .brand-text { font-size: clamp(1.5rem, 5vw, 2.5rem); letter-spacing:4px; text-align:center; font-weight:bold; color:#5a5a5a; text-shadow:-1px -1px 2px rgba(0,0,0,0.8), 1px 1px 2px rgba(255,255,255,0.15), 0 0 5px rgba(0,0,0,0.5); transform:perspective(500px) rotateX(3deg); margin-bottom:-1vh; }
+    .display-screen { width:85%; height:40%; max-height:240px; background:linear-gradient(180deg, #0d1a0d 0%, #030703 100%); border-radius:20px; border:3px solid #3a3a3a; box-shadow:inset 0 0 30px #000000, 0 0 20px #ff00ff33; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden; }
     .visualizer-canvas { width:100%; height:100%; border-radius:10px; position:absolute; top:0; left:0; }
-    .scrolling-message {
-      position:absolute; bottom:10%; left:0; width:100%; text-align:center;
-      font-size:clamp(0.7rem, 2.5vw, 1.1rem); color:#ff00ff; text-shadow:0 0 10px #ff00ff, 0 0 20px #ff00ff;
-      letter-spacing:2px; font-weight:bold; opacity:0; transition:opacity 0.5s ease;
-      pointer-events:none; z-index:10; white-space:nowrap; overflow:hidden;
-    }
-    .scrolling-message.visible { opacity:1; animation:pulse-text 0.8s infinite alternate; }
-    @keyframes pulse-text { from { text-shadow:0 0 10px #ff00ff, 0 0 20px #ff00ff; } to { text-shadow:0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 60px #ff00ff; } }
+    .status-message { position:absolute; bottom:10%; left:0; width:100%; text-align:center; font-size:clamp(0.7rem, 2.5vw, 1rem); color:#ff00ff; text-shadow:0 0 10px #ff00ff; letter-spacing:2px; font-weight:bold; pointer-events:none; z-index:10; white-space:nowrap; overflow:hidden; }
     .mode-selectors { display:flex; gap:1.5rem; margin:0.5vh 0; }
-    .mode-btn {
-      background:linear-gradient(180deg, #3a3a3a 0%, #1f1f1f 100%); border:2px solid #555; border-radius:12px;
-      padding:0.6rem 1.2rem; font-family:'Courier New', monospace; font-weight:bold;
-      font-size:clamp(0.8rem, 2.5vw, 1rem); letter-spacing:2px; color:#888;
-      text-shadow:0 1px 0 #00000088, 0 -1px 0 #ffffff22; box-shadow:inset 0 2px 5px rgba(0,0,0,0.8), 0 3px 6px rgba(0,0,0,0.6);
-      cursor:pointer; transition:all 0.2s ease; text-transform:uppercase; outline:none;
-      user-select:none; -webkit-tap-highlight-color:transparent;
-    }
-    .mode-btn.active {
-      color:#00ffff; text-shadow:0 0 12px #00ffff, 0 0 25px #00ffff; border-color:#00ffff;
-      box-shadow:0 0 15px #00ffff88, inset 0 0 8px #00ffff44; background:linear-gradient(180deg, #2a3a3a 0%, #0f1f1f 100%);
-    }
-    .mode-btn:active { transform:translateY(2px); box-shadow:inset 0 2px 8px rgba(0,0,0,0.9); }
-    .hidden-track-count {
-      position:absolute; bottom:3%; right:5%; color:rgba(255,255,255,0.08);
-      font-size:clamp(0.6rem, 1.8vw, 0.9rem); font-weight:bold; pointer-events:none; z-index:15;
-    }
-    @media (max-width:400px) {
-      .radio-body { width:96vw; height:96vh; border-radius:40px; padding:3vh 4vw; }
-      .display-screen { height:45%; }
-      .brand-text { font-size: clamp(1.2rem, 6vw, 2rem); }
-      .mode-btn { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
-    }
-    @media (min-width:768px) {
-      .radio-body { width:450px; height:650px; }
-      .display-screen { height:40%; }
-    }
+    .mode-btn { background:linear-gradient(180deg, #3a3a3a 0%, #1f1f1f 100%); border:2px solid #555; border-radius:12px; padding:0.6rem 1.2rem; font-family:'Courier New',monospace; font-weight:bold; font-size:clamp(0.8rem, 2.5vw, 1rem); letter-spacing:2px; color:#888; text-shadow:0 1px 0 #00000088, 0 -1px 0 #ffffff22; box-shadow:inset 0 2px 5px rgba(0,0,0,0.8), 0 3px 6px rgba(0,0,0,0.6); cursor:pointer; transition:all 0.2s ease; text-transform:uppercase; outline:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+    .mode-btn.active { color:#00ffff; text-shadow:0 0 12px #00ffff, 0 0 25px #00ffff; border-color:#00ffff; box-shadow:0 0 15px #00ffff88, inset 0 0 8px #00ffff44; background:linear-gradient(180deg, #2a3a3a 0%, #0f1f1f 100%); }
+    .paypal-btn { position:absolute; bottom:20px; left:20px; background:#ffc439; color:#000; font-weight:bold; padding:6px 15px; border-radius:20px; text-decoration:none; font-size:0.7rem; box-shadow:0 0 15px #ffc439; z-index:20; letter-spacing:1px; }
+    .hidden-track-count { position:absolute; bottom:3%; right:5%; color:rgba(255,255,255,0.08); font-size:clamp(0.6rem, 1.8vw, 0.9rem); font-weight:bold; pointer-events:none; z-index:15; }
+    @media (max-width:400px) { .radio-body { width:96vw; height:96vh; border-radius:40px; padding:3vh 4vw; } .display-screen { height:45%; } .brand-text { font-size: clamp(1.2rem, 6vw, 2rem); } .mode-btn { padding: 0.4rem 0.8rem; font-size: 0.7rem; } }
   </style>
 </head>
 <body>
@@ -118,13 +57,12 @@
     <div class="rust-effect"></div>
     <div class="rivet-bottom-left"></div>
     <div class="rivet-bottom-right"></div>
-
     <div class="logo-top" id="logoTopContainer"></div>
     <div class="brand-text" id="brandText">PsikodeliA TeknoRadio™</div>
 
     <div class="display-screen">
       <canvas class="visualizer-canvas" id="vizCanvas"></canvas>
-      <div class="scrolling-message" id="scrollingMessage"></div>
+      <div class="status-message" id="statusMessage">BUSCANDO PISTAS...</div>
     </div>
 
     <div class="mode-selectors">
@@ -132,26 +70,40 @@
       <button class="mode-btn" id="btnPlaylist">PLAYLIST</button>
     </div>
 
+    <a class="paypal-btn" href="https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON" target="_blank" rel="noopener" aria-label="Donar con PayPal">💛 DONAR</a>
     <div class="logo-bottom" id="logoBottomContainer"></div>
     <div class="hidden-track-count" id="hiddenCount">0</div>
   </div>
 
   <script>
     (function() {
-      // ============ CONFIGURACIÓN (SOLO TOCA AQUÍ) ============
-      const LOCAL_TRACKS = [
-        'tracks/trackuno.mp3',
-        'tracks/trackdos te.mp3',];
-      // Pistas de demostración (se usan si fallan las locales)
-      const DEMO_TRACKS = [
-        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-        'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3'
-      ];
+      // ============ CARGA AUTOMÁTICA DE PISTAS ============
+      const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
       const LOGO_TOP_PATH = 'logo_top.png';
       const LOGO_BOTTOM_PATH = 'logo_bottom.png';
-      const ROTATING_MESSAGE = "SpsykødeliA TeknøRadiø™ by TeknøBiblikGrupe™    DaløreXSLab™    DaløreXDjTools™  Ruby's La Beats™    DLRX ToolsInstrument's™     LópezDjTools ™";
+      const PAYPAL_URL = 'https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON';
+
+      // Obtiene automáticamente las pistas desde la carpeta "tracks" usando la API de GitHub
+      async function fetchTrackList() {
+        try {
+          const apiUrl = `https://api.github.com/repos/dlrruby-cpu/SpsykodeliA-TeknoRadioWaves/contents/tracks`;
+          const response = await fetch(apiUrl);
+          if (!response.ok) throw new Error('No se pudo leer la carpeta tracks');
+          const files = await response.json();
+          // Solo archivos de audio
+          const audioExts = ['.mp3','.wav','.ogg','.flac','.m4a','.aac','.opus','.webm'];
+          const trackFiles = files.filter(f => {
+            const ext = '.' + f.name.split('.').pop().toLowerCase();
+            return audioExts.includes(ext);
+          });
+          // Orden alfabético
+          trackFiles.sort((a, b) => a.name.localeCompare(b.name));
+          return trackFiles.map(f => f.download_url);
+        } catch (err) {
+          console.warn('No se pudo obtener la lista de pistas:', err);
+          return [];
+        }
+      }
 
       // ============ CANVAS DE FONDO ============
       const canvasBg = document.getElementById('psyCanvas'), ctxBg = canvasBg.getContext('2d');
@@ -178,13 +130,13 @@
         requestAnimationFrame(drawBg);
       })();
 
-      // ============ AUDIO ENGINE ============
+      // ============ REPRODUCTOR ============
       let audioCtx, tracks=[], currentIdx=-1, isPlaying=false, hasStarted=false;
       let gainA, gainB, sourceA, sourceB, activeGain='A', masterGain, mixTimer, analyser;
       let currentMode='mix';
       const MIX_SEGMENT=120, MIX_CROSSFADE=15, PLAYLIST_CROSSFADE=8;
       const vizCanvas=document.getElementById('vizCanvas'), ctxViz=vizCanvas.getContext('2d');
-      const scrollingMsgEl=document.getElementById('scrollingMessage');
+      const statusMsg=document.getElementById('statusMessage');
       const btnMix=document.getElementById('btnMix'), btnPlaylist=document.getElementById('btnPlaylist');
       let deckA={source:null,gain:null,startTime:0,offset:0}, deckB={source:null,gain:null,startTime:0,offset:0};
 
@@ -221,22 +173,29 @@
         for (const url of urlList) {
           try {
             const buffer=await loadBufferFromUrl(url);
-            const name=url.split('/').pop().replace(/\.[^/.]+$/, "");
+            const name=decodeURIComponent(url.split('/').pop().replace(/\.[^/.]+$/, ""));
             tracks.push({name,url,duration:buffer.duration,buffer});
             console.log('✅ Cargada: '+name);
-          } catch(e) { console.warn('❌ Falló: '+url); }
+          } catch(e) { console.warn('❌ Falló: '+url, e.message); }
         }
       }
 
       async function initTracks() {
-        await loadTracks(LOCAL_TRACKS);
-        if (tracks.length===0) {
-          console.warn('⚠️ Sin pistas locales, cargando demos...');
-          await loadTracks(DEMO_TRACKS);
+        statusMsg.textContent = 'BUSCANDO PISTAS...';
+        let urls = await fetchTrackList();
+        // Si no se encontraron pistas en tracks, usar demo
+        if (urls.length === 0) {
+          statusMsg.textContent = 'NO HAY PISTAS EN TRACKS. USANDO DEMO...';
+          urls = [DEMO_TRACK];
         }
-        document.getElementById('hiddenCount').textContent=tracks.length;
-        if (tracks.length===0) document.getElementById('brandText').textContent='ERROR: SIN PISTAS';
-        else console.log('🎵 Total pistas: '+tracks.length);
+        await loadTracks(urls);
+        document.getElementById('hiddenCount').textContent = tracks.length;
+        if (tracks.length === 0) {
+          statusMsg.textContent = 'ERROR: NO SE PUDO CARGAR NINGUNA PISTA';
+        } else {
+          statusMsg.textContent = tracks.length + ' PISTAS LISTAS. TOCA PARA INICIAR';
+          if (hasStarted) startRadio();
+        }
       }
 
       function stopSource(src) { if (src) { try { src.stop(); } catch(e){} src.disconnect(); } }
@@ -256,6 +215,7 @@
           const duration=currentMode==='mix'?MIX_CROSSFADE:PLAYLIST_CROSSFADE;
           crossfadeVolumes(currentGain, otherGain, duration);
           scheduleNext();
+          statusMsg.textContent = tracks[currentIdx].name;
         }
       }
 
@@ -308,7 +268,8 @@
         const source=playSegment(gainA, currentIdx, 0, 0.9);
         if (source) {
           sourceA=source; activeGain='A'; deckA={source,gain:gainA,startTime:audioCtx.currentTime,offset:0};
-          isPlaying=true; scheduleNext(); startMessageRotation();
+          isPlaying=true; scheduleNext();
+          statusMsg.textContent = tracks[currentIdx].name;
         }
       }
 
@@ -322,31 +283,26 @@
 
       btnMix.addEventListener('click',(e)=>{ e.stopPropagation(); switchMode('mix'); });
       btnPlaylist.addEventListener('click',(e)=>{ e.stopPropagation(); switchMode('playlist'); });
-
-      let messageInterval, messageTimeout;
-      function showMessage() {
-        if (!isPlaying) return;
-        scrollingMsgEl.textContent=ROTATING_MESSAGE; scrollingMsgEl.classList.add('visible');
-        if (messageTimeout) clearTimeout(messageTimeout);
-        messageTimeout=setTimeout(()=>scrollingMsgEl.classList.remove('visible'), 4000);
-      }
-      function startMessageRotation() {
-        if (messageInterval) clearInterval(messageInterval);
-        setTimeout(()=>{ if (isPlaying) showMessage(); }, 2000);
-        messageInterval=setInterval(()=>{ if (isPlaying) showMessage(); }, 15000);
-      }
+      document.querySelector('.paypal-btn').href = PAYPAL_URL;
 
       function handleFirstTouch(e) {
         if (hasStarted) return;
-        if (e&&(e.target===btnMix||e.target===btnPlaylist)) return;
+        if (e && (e.target === btnMix || e.target === btnPlaylist || e.target.closest('.paypal-btn'))) return;
         getAC();
-        if (tracks.length===0) {
-          initTracks().then(()=>{ hasStarted=true; startRadio(); });
-        } else { hasStarted=true; startRadio(); }
+        hasStarted = true;
+        if (tracks.length === 0) {
+          initTracks().then(() => {
+            if (tracks.length > 0) startRadio();
+          });
+        } else {
+          startRadio();
+        }
       }
-      document.body.addEventListener('click', handleFirstTouch, { once:true });
-      document.body.addEventListener('touchstart', handleFirstTouch, { once:true });
 
+      document.body.addEventListener('click', handleFirstTouch);
+      document.body.addEventListener('touchstart', handleFirstTouch);
+
+      // Visualizador
       (function drawVisualizer() {
         requestAnimationFrame(drawVisualizer);
         const w=vizCanvas.width, h=vizCanvas.height;
@@ -389,6 +345,7 @@
         }
       })();
 
+      // Logos
       async function loadLogo(path, containerId, hideBrand) {
         try {
           const resp=await fetch(path);
@@ -404,6 +361,7 @@
       loadLogo(LOGO_TOP_PATH, 'logoTopContainer', true);
       loadLogo(LOGO_BOTTOM_PATH, 'logoBottomContainer', false);
 
+      // Arrancar detección automática al cargar
       initTracks();
     })();
   </script>
