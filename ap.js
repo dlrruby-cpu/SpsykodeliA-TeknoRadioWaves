@@ -1,4 +1,3 @@
-// ============ LISTA DE CANCIONES (LOCALES / GITHUB) ============
 const LOCAL_TRACKS = [
   // "trackuno.mp3",
   // "trackdos.mp3",
