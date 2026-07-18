@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>PsikodeliA TeknoRadio™ – Underground Techno Waves</title>
-  <meta name="description" content="Web Radio Techno con mezcla automática, visualizador en tiempo real y selector de modo Mix/Playlist.">
+  <title>PsikodeliA TeknoRadio™ – Radio Techno Psicodélica</title>
+  <meta name="description" content="Radio Techno psicodélica con mezcla automática, visualizador en tiempo real y selector de modo Mix/Playlist.">
   <meta name="keywords" content="radio techno, techno radio, mezcla automática, DJ online, playlist, mix, modo reproducción">
   <meta name="author" content="DaløreXscripLab's">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://tu-dominio.com/">
+  <link rel="canonical" href="https://dlrruby-cpu.github.io/SpsykodeliA-TeknoRadioWaves/">
   <meta property="og:title" content="PsikodeliA TeknoRadio™ – Radio Techno Psicodélica">
   <meta property="og:description" content="Mezcla automática de techno psicodélico. Elige entre Mix (2 min) o Playlist (temas completos).">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://tu-dominio.com/">
-  <meta property="og:image" content="https://tu-dominio.com/og-image.jpg">
+  <meta property="og:url" content="https://dlrruby-cpu.github.io/SpsykodeliA-TeknoRadioWaves/">
+  <meta property="og:image" content="https://dlrruby-cpu.github.io/SpsykodeliA-TeknoRadioWaves/og-image.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="PsikodeliA TeknoRadio™ – Radio Techno Psicodélica">
   <meta name="twitter:description" content="Mezcla automática de techno psicodélico. Elige entre Mix (2 min) o Playlist (temas completos).">
@@ -86,7 +86,6 @@
     .logo-top img { filter:drop-shadow(0 0 8px #ff00ff); }
     .logo-bottom img { filter:drop-shadow(0 0 8px #00ffff); }
 
-    /* ========== TEXTO GRABADO EN METAL ========== */
     .brand-text {
       font-size: clamp(1.5rem, 5vw, 2.5rem);
       letter-spacing: 4px;
@@ -144,7 +143,6 @@
       to { text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 60px #ff00ff; }
     }
 
-    /* ========== SELECTORES DE MODO (INDUSTRIALES) ========== */
     .mode-selectors {
       display: flex;
       gap: 1.5rem;
@@ -185,6 +183,75 @@
       box-shadow: inset 0 2px 8px rgba(0,0,0,0.9);
     }
 
+    /* Modal legal */
+    .legal-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.92);
+      z-index: 500;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: #ccc;
+      font-size: 0.85rem;
+    }
+    .legal-modal.show { display: flex; }
+    .legal-content {
+      background: #1a1a1a;
+      border: 2px solid #ff00ff66;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 0 30px #ff00ff44;
+    }
+    .legal-content h2 {
+      color: #ff00ff;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+    }
+    .legal-content p { margin: 0.8rem 0; line-height: 1.4; }
+    .legal-content a { color: #00ffff; text-decoration: underline; }
+    .legal-btn {
+      background: #ff00ff;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      padding: 0.6rem 2rem;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-family: 'Courier New', monospace;
+      box-shadow: 0 0 20px #ff00ff88;
+    }
+
+    .cookie-banner {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #111;
+      color: #aaa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.7rem;
+      font-size: 0.7rem;
+      z-index: 400;
+      border-top: 1px solid #ff00ff44;
+      flex-wrap: wrap;
+    }
+    .cookie-banner button {
+      background: #333;
+      border: 1px solid #ff00ff;
+      color: #fff;
+      padding: 0.3rem 1rem;
+      border-radius: 20px;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+    }
+
     .hidden-track-count {
       position:absolute; bottom:3%; right:5%;
       color:rgba(255,255,255,0.08);
@@ -220,14 +287,30 @@
       <div class="scrolling-message" id="scrollingMessage"></div>
     </div>
 
-    <!-- Selectores de modo -->
     <div class="mode-selectors">
-      <button class="mode-btn active" id="btnMix" aria-label="Modo Mix (2 minutos)">MIX</button>
-      <button class="mode-btn" id="btnPlaylist" aria-label="Modo Playlist (temas completos)">PLAYLIST</button>
+      <button class="mode-btn active" id="btnMix">MIX</button>
+      <button class="mode-btn" id="btnPlaylist">PLAYLIST</button>
     </div>
 
     <div class="logo-bottom" id="logoBottomContainer"></div>
     <div class="hidden-track-count" id="hiddenCount">0</div>
+  </div>
+
+  <!-- Modal legal -->
+  <div class="legal-modal" id="legalModal">
+    <div class="legal-content">
+      <h2>PsikodeliA TeknoRadio™</h2>
+      <p>Este sitio utiliza cookies técnicas para el funcionamiento del reproductor. No se recopilan datos personales.</p>
+      <p>Al utilizar esta radio aceptas nuestra <a href="#">Política de Privacidad</a> y <a href="#">Términos de Uso</a>.</p>
+      <button class="legal-btn" id="acceptLegalBtn">Aceptar y entrar</button>
+    </div>
+  </div>
+
+  <!-- Cookie banner -->
+  <div class="cookie-banner" id="cookieBanner">
+    <span>🍪 Usamos cookies técnicas esenciales. Sin ellas la radio no puede sonar.</span>
+    <button id="acceptCookiesBtn">Aceptar</button>
+    <button id="moreInfoBtn">Más info</button>
   </div>
 
   <script src="app.js"></script>
