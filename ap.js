@@ -1,7 +1,7 @@
 (function() {
   // ==================== CONFIGURACIÓN ====================
   const TRACK_LIST = [
-    'tracks/tema1.mp3',
+    'tracks/pokaimix.mp3',
     'tracks/tema2.mp3',
     'tracks/tema3.mp3'
   ];
