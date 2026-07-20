@@ -12,7 +12,7 @@ const LOCAL_TRACKS = [
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 const LOGO_TOP_PATH = 'logo_top.png';
 const LOGO_BOTTOM_PATH = 'logo_bottom.png';
-const PAYPAL_URL = 'dlrx75@gmail.com';
+const PAYPAL_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=dlrx75@gmail.com&item_name=Donación+PsikodeliA+TeknoRadio&currency_code=EUR';
 
 // ============ CANVAS DE FONDO (optimizado + aislado del audio) ============
 const canvasBg = document.getElementById('psyCanvas'), ctxBg = canvasBg.getContext('2d');
