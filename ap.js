@@ -1,6 +1,5 @@
 // ============ LISTA DE PISTAS LOCALES ============
 const LOCAL_TRACKS = [
-  "velocitytripbydlrx.mp3",
   "track1.mp3",
   "track2.mp3",
   "track3.mp3",
@@ -15,30 +14,149 @@ const LOGO_TOP_PATH = 'logo_top.png';
 const LOGO_BOTTOM_PATH = 'logo_bottom.png';
 const PAYPAL_URL = 'https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON';
 
-// ============ CANVAS DE FONDO ============
+// ============ CANVAS DE FONDO (con efectos reactivos al audio) ============
 const canvasBg = document.getElementById('psyCanvas'), ctxBg = canvasBg.getContext('2d');
-function resizeBg() { canvasBg.width = innerWidth; canvasBg.height = innerHeight; }
-resizeBg(); window.addEventListener('resize', resizeBg);
+
+// Variables de control del fondo reactivo (inicializadas a estado seguro)
+let bgParticles = [];
+let bgStars = [];
+let bgFreqData = null;
+let bgAudioReactive = false;
+
+function resizeBg() {
+  canvasBg.width = innerWidth;
+  canvasBg.height = innerHeight;
+  // Generar partículas según tamaño de pantalla
+  const area = canvasBg.width * canvasBg.height;
+  const particleCount = Math.min(50, Math.max(20, Math.floor(area / 30000)));
+  bgParticles = [];
+  for (let i = 0; i < particleCount; i++) {
+    bgParticles.push({
+      x: Math.random() * canvasBg.width,
+      y: Math.random() * canvasBg.height,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      size: Math.random() * 2.2 + 0.6,
+      hue: Math.random() * 360,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+  // Generar estrellas/luces titilantes
+  const starCount = Math.min(80, Math.max(30, Math.floor(area / 22000)));
+  bgStars = [];
+  for (let i = 0; i < starCount; i++) {
+    bgStars.push({
+      x: Math.random() * canvasBg.width,
+      y: Math.random() * canvasBg.height,
+      size: Math.random() * 1.6 + 0.4,
+      twinkleSpeed: Math.random() * 0.03 + 0.01,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+}
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
 let tBg = 0;
-(function drawBg() {
-  tBg += 0.005;
-  const g = ctxBg.createRadialGrad0ient(canvasBg.width/2, canvasBg.height/2, 0, canvasBg.width/2, canvasBg.height/2, canvasBg.width);
-  g.addColorStop(0, '#0a0015'); g.addColorStop(1, '#000');
-  ctxBg.fillStyle = g; ctxBg.fillRect(0, 0, canvasBg.width, canvasBg.height);
-  for (let i = 0; i < 8; i++) {
-    ctxBg.beginPath(); ctxBg.strokeStyle = `hsla(${(tBg*60+i*45)%360},100%,55%,0.12)`; ctxBg.lineWidth = 2.5;
-    for (let x = 0; x < canvasBg.width; x += 4) {
-      const y = canvasBg.height/2 + Math.sin(x*0.015+tBg*2.5+i*0.8)*90 + Math.cos(x*0.008+tBg*1.8+i*1.2)*50 + Math.sin(x*0.003+tBg*3.5)*130;
+function drawBg() {
+  tBg += 0.008;
+  const w = canvasBg.width, h = canvasBg.height;
+
+  // ===== Obtener datos de audio si está disponible =====
+  let bass = 0, mid = 0, treble = 0, overall = 0;
+  if (bgAudioReactive && bgFreqData && analyser) {
+    analyser.getByteFrequencyData(bgFreqData);
+    let bSum = 0, mSum = 0, tSum = 0;
+    const bins = bgFreqData.length;
+    for (let i = 0; i < 8; i++) bSum += bgFreqData[i];
+    for (let i = 8; i < 40; i++) mSum += bgFreqData[i];
+    for (let i = 40; i < bins; i++) tSum += bgFreqData[i];
+    bass = bSum / (8 * 255);
+    mid = mSum / (32 * 255);
+    treble = tSum / ((bins - 40) * 255);
+    overall = (bass * 2 + mid + treble) / 4;
+  }
+
+  // ===== Fondo base con gradiente que cambia de color =====
+  const baseHue = (tBg * 25) % 360;
+  const g = ctxBg.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h));
+  g.addColorStop(0, `hsl(${baseHue}, 60%, ${4 + overall * 14}%)`);
+  g.addColorStop(0.5, `hsl(${(baseHue + 60) % 360}, 50%, ${2 + overall * 7}%)`);
+  g.addColorStop(1, '#000');
+  ctxBg.fillStyle = g;
+  ctxBg.fillRect(0, 0, w, h);
+
+  // ===== Estrellas/luces titilantes =====
+  for (const star of bgStars) {
+    const twinkle = Math.sin(tBg * 30 * star.twinkleSpeed + star.phase) * 0.5 + 0.5;
+    const size = star.size * (0.5 + twinkle * 0.8) * (1 + overall * 1.5);
+    const alpha = twinkle * (0.35 + overall * 0.5);
+    ctxBg.fillStyle = `hsla(${(tBg * 40 + star.x * 0.5) % 360}, 85%, 75%, ${alpha})`;
+    ctxBg.beginPath();
+    ctxBg.arc(star.x, star.y, size, 0, Math.PI * 2);
+    ctxBg.fill();
+  }
+
+  // ===== Ondas psicodélicas múltiples (reaccionan al bajo) =====
+  for (let i = 0; i < 10; i++) {
+    ctxBg.beginPath();
+    const hue = (tBg * 50 + i * 36) % 360;
+    const amp = (75 + i * 10) * (1 + bass * 1.6);
+    ctxBg.strokeStyle = `hsla(${hue}, 100%, 60%, ${0.1 + bass * 0.3 + mid * 0.12})`;
+    ctxBg.lineWidth = 2 + bass * 3;
+    for (let x = 0; x <= w; x += 4) {
+      const y = h/2
+        + Math.sin(x * 0.012 + tBg * 2 + i * 0.7) * amp
+        + Math.cos(x * 0.006 + tBg * 1.5 + i * 1.0) * amp * 0.6
+        + Math.sin(x * 0.002 + tBg * 3) * amp * 1.3;
       x === 0 ? ctxBg.moveTo(x, y) : ctxBg.lineTo(x, y);
     }
     ctxBg.stroke();
   }
-  for (let r = 30; r < Math.max(canvasBg.width, canvasBg.height)*0.8; r += 50) {
-    ctxBg.beginPath(); ctxBg.strokeStyle = `hsla(${(tBg*30+r*0.5)%360},90%,55%,${0.05+Math.abs(Math.sin(tBg*1.5+r*0.01))*0.08})`;
-    ctxBg.lineWidth = 1.5; ctxBg.arc(canvasBg.width/2, canvasBg.height/2, r+Math.sin(tBg*2.5+r*0.02)*25, 0, Math.PI*2); ctxBg.stroke();
+
+  // ===== Círculos concéntricos pulsantes =====
+  const cx = w/2, cy = h/2;
+  for (let r = 40; r < Math.max(w, h) * 0.7; r += 55) {
+    ctxBg.beginPath();
+    const alpha = 0.04 + Math.abs(Math.sin(tBg * 1.5 + r * 0.01)) * 0.08 + overall * 0.18;
+    ctxBg.strokeStyle = `hsla(${(tBg * 25 + r * 0.4) % 360}, 90%, 55%, ${alpha})`;
+    ctxBg.lineWidth = 1.5 + overall * 3.5;
+    ctxBg.arc(cx, cy, r + Math.sin(tBg * 2 + r * 0.02) * 28 * (1 + bass), 0, Math.PI * 2);
+    ctxBg.stroke();
   }
+
+  // ===== Partículas flotantes con brillo (se mueven con el ritmo) =====
+  for (const p of bgParticles) {
+    p.x += p.vx * (1 + overall * 3);
+    p.y += p.vy * (1 + overall * 3);
+    if (p.x < -10) p.x = w + 10;
+    if (p.x > w + 10) p.x = -10;
+    if (p.y < -10) p.y = h + 10;
+    if (p.y > h + 10) p.y = -10;
+
+    const size = p.size * (1 + bass * 2.5);
+    const hue = (p.hue + tBg * 60) % 360;
+
+    // Brillo exterior (glow)
+    const grad = ctxBg.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 4);
+    grad.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.55)`);
+    grad.addColorStop(0.5, `hsla(${hue}, 100%, 60%, 0.12)`);
+    grad.addColorStop(1, `hsla(${hue}, 100%, 50%, 0)`);
+    ctxBg.fillStyle = grad;
+    ctxBg.beginPath();
+    ctxBg.arc(p.x, p.y, size * 4, 0, Math.PI * 2);
+    ctxBg.fill();
+
+    // Núcleo brillante
+    ctxBg.fillStyle = `hsla(${hue}, 100%, 80%, 0.9)`;
+    ctxBg.beginPath();
+    ctxBg.arc(p.x, p.y, size, 0, Math.PI * 2);
+    ctxBg.fill();
+  }
+
   requestAnimationFrame(drawBg);
-})();
+}
+drawBg();
 
 // ============ REPRODUCTOR ============
 let audioCtx, tracks=[], currentIdx=-1, isPlaying=false, hasStarted=false;
@@ -67,6 +185,9 @@ function setupMaster() {
   if (!masterGain) {
     masterGain=ac.createGain(); masterGain.gain.value=0.9;
     analyser=ac.createAnalyser(); analyser.fftSize=256;
+    // Activar fondo reactivo al audio
+    bgAudioReactive = true;
+    bgFreqData = new Uint8Array(analyser.frequencyBinCount);
     masterGain.connect(analyser); analyser.connect(ac.destination);
   }
   if (!gainA) { gainA=ac.createGain(); gainA.gain.value=0; gainA.connect(masterGain); }
