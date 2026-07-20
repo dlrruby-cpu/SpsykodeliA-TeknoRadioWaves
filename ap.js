@@ -1,21 +1,22 @@
+
 // ============ LISTA DE PISTAS LOCALES ============
 const LOCAL_TRACKS = [
   "track1_fuckwarsepzair.mp3",
   "track2_Disneepzair.mp3",
   "track3_Disneepzair.mp3",
   "track4velocitytripbydlrx.mp3",
-  "track5accionv1_spsykødeliatknø",
-  "track6healingfrequencys_spsykødeliatknø",
-  "track7healingfrequencys_Spsykødeliatknø", 
-  "track8healingrequencys_spsykødeliatknø",
-  "track9frecuenciasanadoras_spsykódeliatknó"
+  "track5accionv1_spsykodeliatkno.mp3",
+  "track6healingfrequencys_spsykodeliatkno.mp3",
+  "track7healingfrequencys_Spsykodeliatkno.mp3", 
+  "track8healingrequencys_spsykodeliatkno.mp3",
+  "track9frecuenciasanadoras_spsykodeliatkno.mp3"
 ];
 
 // ============ CONFIGURACIÓN (NO TOCAR) ============
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 const LOGO_TOP_PATH = 'logo_top.png';
 const LOGO_BOTTOM_PATH = 'logo_bottom.png';
-const PAYPAL_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=dlrx75@gmail.com&item_name=Donación+PsikodeliA+TeknoRadio&currency_code=EUR';
+const PAYPAL_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=dlrx75@gmail.com&item_name=Donaci%C3%B3n+PsikodeliA+TeknoRadio&currency_code=EUR';
 
 // ============ CANVAS DE FONDO (optimizado + aislado del audio) ============
 const canvasBg = document.getElementById('psyCanvas'), ctxBg = canvasBg.getContext('2d');
@@ -30,7 +31,6 @@ function resizeBg() {
   canvasBg.width = innerWidth;
   canvasBg.height = innerHeight;
   const area = canvasBg.width * canvasBg.height;
-  // Partículas reducidas: máximo 22 (antes 35)
   const particleCount = Math.min(22, Math.max(8, Math.floor(area / 50000)));
   bgParticles = [];
   for (let i = 0; i < particleCount; i++) {
@@ -44,7 +44,6 @@ function resizeBg() {
       phase: Math.random() * Math.PI * 2
     });
   }
-  // Estrellas reducidas: máximo 40 (antes 50)
   const starCount = Math.min(40, Math.max(15, Math.floor(area / 35000)));
   bgStars = [];
   for (let i = 0; i < starCount; i++) {
@@ -62,7 +61,7 @@ window.addEventListener('resize', resizeBg);
 
 let tBg = 0;
 (function drawBg() {
-  try { // try-catch de seguridad por si algo falla, no rompe el script
+  try {
     tBg += 0.008;
     const w = canvasBg.width, h = canvasBg.height;
     const bass = bgBass;
@@ -70,7 +69,6 @@ let tBg = 0;
     const treble = bgTreble;
     const overall = bgOverall;
 
-    // Fondo base
     const baseHue = (tBg * 25) % 360;
     const g = ctxBg.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h));
     g.addColorStop(0, `hsl(${baseHue}, 60%, ${4 + overall * 14}%)`);
@@ -79,7 +77,6 @@ let tBg = 0;
     ctxBg.fillStyle = g;
     ctxBg.fillRect(0, 0, w, h);
 
-    // Estrellas
     for (let si = 0; si < bgStars.length; si++) {
       const star = bgStars[si];
       const twinkle = Math.sin(tBg * 30 * star.twinkleSpeed + star.phase) * 0.5 + 0.5;
@@ -91,7 +88,6 @@ let tBg = 0;
       ctxBg.fill();
     }
 
-    // Ondas
     for (let i = 0; i < 8; i++) {
       ctxBg.beginPath();
       const hue = (tBg * 50 + i * 45) % 360;
@@ -108,7 +104,6 @@ let tBg = 0;
       ctxBg.stroke();
     }
 
-    // Círculos concéntricos
     const cx = w/2, cy = h/2;
     for (let r = 30; r < Math.max(w, h) * 0.8; r += 50) {
       ctxBg.beginPath();
@@ -119,7 +114,6 @@ let tBg = 0;
       ctxBg.stroke();
     }
 
-    // Partículas
     for (let pi = 0; pi < bgParticles.length; pi++) {
       const p = bgParticles[pi];
       p.x += p.vx * (1 + overall * 3);
@@ -132,7 +126,6 @@ let tBg = 0;
       const size = p.size * (1 + bass * 2.5);
       const hue = (p.hue + tBg * 60) % 360;
 
-      // ✅ FIX: ctxBg (antes era ctxViz que causaba el crash)
       const grad = ctxBg.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 4);
       grad.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.5)`);
       grad.addColorStop(0.5, `hsla(${hue}, 100%, 60%, 0.1)`);
@@ -148,7 +141,6 @@ let tBg = 0;
       ctxBg.fill();
     }
   } catch(e) {
-    // Si algo falla en el fondo, no rompe la web
     console.warn('Background effect error (no crítico):', e.message);
   }
   requestAnimationFrame(drawBg);
@@ -339,6 +331,8 @@ if(payBtn) payBtn.href = PAYPAL_URL;
 
 function handleFirstTouch(e) {
   if (document.getElementById('legalModal').style.display !== 'none') return;
+  
+  // SOLUCIÓN PAYPAL: Si tocan el botón de PayPal, salimos de la función inmediatamente
   if (e && (e.target === btnMix || e.target === btnPlaylist || e.target.closest('.paypal-btn'))) return;
 
   if (hasStarted) {
@@ -368,7 +362,7 @@ function handleFirstTouch(e) {
 document.body.addEventListener('click', handleFirstTouch);
 document.body.addEventListener('touchstart', handleFirstTouch);
 
-// ============ VISUALIZADOR (círculo perfecto + púas reactivas) ============
+// ============ VISUALIZADOR ============
 (function drawVisualizer() {
   requestAnimationFrame(drawVisualizer);
   const w = vizCanvas.width, h = vizCanvas.height;
@@ -396,7 +390,6 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   for (let i = 0; i < bufferLength; i++) avg += dataArray[i];
   avg = avg / bufferLength / 255;
 
-  // Glow
   const glow = ctxViz.createRadialGradient(cx, cy, baseRadius * 0.5, cx, cy, baseRadius * 1.5);
   glow.addColorStop(0, 'hsla(180, 100%, 60%, 0.18)');
   glow.addColorStop(1, 'hsla(180, 100%, 60%, 0)');
@@ -405,7 +398,6 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   ctxViz.arc(cx, cy, baseRadius * 1.5, 0, Math.PI * 2);
   ctxViz.fill();
 
-  // Círculo principal redondo
   const mainRadius = baseRadius * (0.85 + avg * 0.7);
   const mainGrad = ctxViz.createRadialGradient(cx, cy, 0, cx, cy, mainRadius);
   mainGrad.addColorStop(0, 'hsla(300, 100%, 60%, 0.4)');
@@ -422,7 +414,6 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   ctxViz.lineWidth = 2.5;
   ctxViz.stroke();
 
-  // Púas reactivas
   const spikeCount = 80;
   for (let i = 0; i < spikeCount; i++) {
     const value = dataArray[Math.floor(i * bufferLength / spikeCount)] / 255;
@@ -441,7 +432,6 @@ document.body.addEventListener('touchstart', handleFirstTouch);
     ctxViz.stroke();
   }
 
-  // Onda media
   ctxViz.beginPath();
   for (let i = 0; i < bufferLength; i++) {
     const value = dataArray[i] / 255;
@@ -460,7 +450,6 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   ctxViz.lineWidth = 1.8;
   ctxViz.stroke();
 
-  // Núcleo
   const coreSize = baseRadius * 0.18 * (0.6 + avg * 2);
   const coreGrad = ctxViz.createRadialGradient(cx, cy, 0, cx, cy, coreSize);
   coreGrad.addColorStop(0, 'hsla(60, 100%, 95%, 1)');
@@ -471,7 +460,6 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   ctxViz.arc(cx, cy, coreSize, 0, Math.PI * 2);
   ctxViz.fill();
 
-  // Barras
   const barCount = 48;
   const barWidth = w / barCount;
   for (let i = 0; i < barCount; i++) {
