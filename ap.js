@@ -1,12 +1,15 @@
 // ============ LISTA DE PISTAS LOCALES ============
 const LOCAL_TRACKS = [
-  "track1.mp3",
-  "track2.mp3",
-  "track3.mp3",
-  "track4.mp3",
-  "disneepzair.mp3",
-  "orangeepzair.mp3",
-  "velocitytripbydlrx.mp3" ];
+  "track1_fuckwarsepzair.mp3",
+  "track2_Disneepzair.mp3",
+  "track3_Disneepzair.mp3",
+  "track4velocitytripbydlrx.mp3",
+  "track5accionv1_spsykødeliatknø",
+  "track6healingfrequencys_spsykødeliatknø",
+  "track7healingfrequencys_Spsykødeliatknø", 
+  "track8healingrequencys_spsykødeliatknø",
+  "track9frecuenciasanadoras_spsykódeliatknó"
+];
 
 // ============ CONFIGURACIÓN (NO TOCAR) ============
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
