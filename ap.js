@@ -12,7 +12,7 @@ const LOCAL_TRACKS = [
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 const LOGO_TOP_PATH = 'logo_top.png';
 const LOGO_BOTTOM_PATH = 'logo_bottom.png';
-const PAYPAL_URL = 'https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON';
+const PAYPAL_URL = 'dlrx75@gmail.com';
 
 // ============ CANVAS DE FONDO (optimizado + aislado del audio) ============
 const canvasBg = document.getElementById('psyCanvas'), ctxBg = canvasBg.getContext('2d');
@@ -155,7 +155,7 @@ let tBg = 0;
 let audioCtx, tracks=[], currentIdx=-1, isPlaying=false, hasStarted=false;
 let gainA, gainB, sourceA, sourceB, activeGain='A', masterGain, mixTimer, analyser;
 let currentMode='mix';
-const MIX_SEGMENT=120, MIX_CROSSFADE=15, PLAYLIST_CROSSFADE=8;
+const MIX_SEGMENT=144, MIX_CROSSFADE=15, PLAYLIST_CROSSFADE=8;
 const vizCanvas=document.getElementById('vizCanvas'), ctxViz=vizCanvas.getContext('2d');
 const statusMsg=document.getElementById('statusMessage');
 const btnMix=document.getElementById('btnMix'), btnPlaylist=document.getElementById('btnPlaylist');
