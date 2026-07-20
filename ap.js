@@ -514,10 +514,3 @@ acceptBtn.addEventListener('click', (e) => {
 initTracks();
 
 
-"velocitytripbydlrx.mp3",
-  "track1.mp3",
-  "track2.mp3",
-  "track3.mp3",
-  "track4.mp3",
-  "disneepzair.mp3",
-  "orangeepzair.mp3"
