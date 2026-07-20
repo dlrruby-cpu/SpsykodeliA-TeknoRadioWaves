@@ -1,12 +1,13 @@
 // ============ LISTA DE PISTAS LOCALES ============
 const LOCAL_TRACKS = [
-  "velocitytripbydlrx.mp3",
+  
   "track1.mp3",
   "track2.mp3",
   "track3.mp3",
   "track4.mp3",
   "disneepzair.mp3",
-  "orangeepzair.mp3"
+  "orangeepzair.mp3",
+  "velocitytripbydlrx.mp3"
 ];
 
 // ============ CONFIGURACIÓN (NO TOCAR) ============
