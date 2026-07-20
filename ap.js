@@ -1,5 +1,6 @@
 // ============ LISTA DE PISTAS LOCALES ============
 const LOCAL_TRACKS = [
+  "insomniobydalorex.mp3",
   "track1.mp3",
   "track2.mp3",
   "track3.mp3",
@@ -21,7 +22,7 @@ resizeBg(); window.addEventListener('resize', resizeBg);
 let tBg = 0;
 (function drawBg() {
   tBg += 0.005;
-  const g = ctxBg.createRadialGradient(canvasBg.width/2, canvasBg.height/2, 0, canvasBg.width/2, canvasBg.height/2, canvasBg.width);
+  const g = ctxBg.createRadialGrad0ient(canvasBg.width/2, canvasBg.height/2, 0, canvasBg.width/2, canvasBg.height/2, canvasBg.width);
   g.addColorStop(0, '#0a0015'); g.addColorStop(1, '#000');
   ctxBg.fillStyle = g; ctxBg.fillRect(0, 0, canvasBg.width, canvasBg.height);
   for (let i = 0; i < 8; i++) {
