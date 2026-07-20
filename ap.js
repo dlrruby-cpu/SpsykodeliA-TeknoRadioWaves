@@ -15,41 +15,39 @@ const LOGO_TOP_PATH = 'logo_top.png';
 const LOGO_BOTTOM_PATH = 'logo_bottom.png';
 const PAYPAL_URL = 'https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON';
 
-// ============ CANVAS DE FONDO (con efectos reactivos al audio) ============
+// ============ CANVAS DE FONDO (efectos reactivos, aislados del audio) ============
 const canvasBg = document.getElementById('psyCanvas'), ctxBg = canvasBg.getContext('2d');
 
-// Variables de control del fondo reactivo (inicializadas a estado seguro)
 let bgParticles = [];
 let bgStars = [];
 let bgFreqData = null;
 let bgAudioReactive = false;
+let bgBass = 0, bgMid = 0, bgTreble = 0, bgOverall = 0;
 
 function resizeBg() {
   canvasBg.width = innerWidth;
   canvasBg.height = innerHeight;
-  // Generar partículas según tamaño de pantalla
   const area = canvasBg.width * canvasBg.height;
-  const particleCount = Math.min(50, Math.max(20, Math.floor(area / 30000)));
+  const particleCount = Math.min(35, Math.max(15, Math.floor(area / 40000)));
   bgParticles = [];
   for (let i = 0; i < particleCount; i++) {
     bgParticles.push({
       x: Math.random() * canvasBg.width,
       y: Math.random() * canvasBg.height,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-      size: Math.random() * 2.2 + 0.6,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      size: Math.random() * 2 + 0.5,
       hue: Math.random() * 360,
       phase: Math.random() * Math.PI * 2
     });
   }
-  // Generar estrellas/luces titilantes
-  const starCount = Math.min(80, Math.max(30, Math.floor(area / 22000)));
+  const starCount = Math.min(50, Math.max(20, Math.floor(area / 28000)));
   bgStars = [];
   for (let i = 0; i < starCount; i++) {
     bgStars.push({
       x: Math.random() * canvasBg.width,
       y: Math.random() * canvasBg.height,
-      size: Math.random() * 1.6 + 0.4,
+      size: Math.random() * 1.4 + 0.3,
       twinkleSpeed: Math.random() * 0.03 + 0.01,
       phase: Math.random() * Math.PI * 2
     });
@@ -59,26 +57,14 @@ resizeBg();
 window.addEventListener('resize', resizeBg);
 
 let tBg = 0;
-function drawBg() {
+(function drawBg() {
   tBg += 0.008;
   const w = canvasBg.width, h = canvasBg.height;
+  const bass = bgBass;
+  const mid = bgMid;
+  const treble = bgTreble;
+  const overall = bgOverall;
 
-  // ===== Obtener datos de audio si está disponible =====
-  let bass = 0, mid = 0, treble = 0, overall = 0;
-  if (bgAudioReactive && bgFreqData && analyser) {
-    analyser.getByteFrequencyData(bgFreqData);
-    let bSum = 0, mSum = 0, tSum = 0;
-    const bins = bgFreqData.length;
-    for (let i = 0; i < 8; i++) bSum += bgFreqData[i];
-    for (let i = 8; i < 40; i++) mSum += bgFreqData[i];
-    for (let i = 40; i < bins; i++) tSum += bgFreqData[i];
-    bass = bSum / (8 * 255);
-    mid = mSum / (32 * 255);
-    treble = tSum / ((bins - 40) * 255);
-    overall = (bass * 2 + mid + treble) / 4;
-  }
-
-  // ===== Fondo base con gradiente que cambia de color =====
   const baseHue = (tBg * 25) % 360;
   const g = ctxBg.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h));
   g.addColorStop(0, `hsl(${baseHue}, 60%, ${4 + overall * 14}%)`);
@@ -87,8 +73,8 @@ function drawBg() {
   ctxBg.fillStyle = g;
   ctxBg.fillRect(0, 0, w, h);
 
-  // ===== Estrellas/luces titilantes =====
-  for (const star of bgStars) {
+  for (let si = 0; si < bgStars.length; si++) {
+    const star = bgStars[si];
     const twinkle = Math.sin(tBg * 30 * star.twinkleSpeed + star.phase) * 0.5 + 0.5;
     const size = star.size * (0.5 + twinkle * 0.8) * (1 + overall * 1.5);
     const alpha = twinkle * (0.35 + overall * 0.5);
@@ -98,36 +84,34 @@ function drawBg() {
     ctxBg.fill();
   }
 
-  // ===== Ondas psicodélicas múltiples (reaccionan al bajo) =====
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 8; i++) {
     ctxBg.beginPath();
-    const hue = (tBg * 50 + i * 36) % 360;
-    const amp = (75 + i * 10) * (1 + bass * 1.6);
-    ctxBg.strokeStyle = `hsla(${hue}, 100%, 60%, ${0.1 + bass * 0.3 + mid * 0.12})`;
-    ctxBg.lineWidth = 2 + bass * 3;
+    const hue = (tBg * 50 + i * 45) % 360;
+    const amp = (80 + i * 12) * (1 + bass * 1.5);
+    ctxBg.strokeStyle = `hsla(${hue}, 100%, 60%, ${0.1 + bass * 0.25 + mid * 0.1})`;
+    ctxBg.lineWidth = 2 + bass * 2.5;
     for (let x = 0; x <= w; x += 4) {
       const y = h/2
-        + Math.sin(x * 0.012 + tBg * 2 + i * 0.7) * amp
-        + Math.cos(x * 0.006 + tBg * 1.5 + i * 1.0) * amp * 0.6
-        + Math.sin(x * 0.002 + tBg * 3) * amp * 1.3;
+        + Math.sin(x * 0.015 + tBg * 2.5 + i * 0.8) * amp
+        + Math.cos(x * 0.008 + tBg * 1.8 + i * 1.2) * amp * 0.5
+        + Math.sin(x * 0.003 + tBg * 3.5) * amp * 1.3;
       x === 0 ? ctxBg.moveTo(x, y) : ctxBg.lineTo(x, y);
     }
     ctxBg.stroke();
   }
 
-  // ===== Círculos concéntricos pulsantes =====
   const cx = w/2, cy = h/2;
-  for (let r = 40; r < Math.max(w, h) * 0.7; r += 55) {
+  for (let r = 30; r < Math.max(w, h) * 0.8; r += 50) {
     ctxBg.beginPath();
-    const alpha = 0.04 + Math.abs(Math.sin(tBg * 1.5 + r * 0.01)) * 0.08 + overall * 0.18;
-    ctxBg.strokeStyle = `hsla(${(tBg * 25 + r * 0.4) % 360}, 90%, 55%, ${alpha})`;
-    ctxBg.lineWidth = 1.5 + overall * 3.5;
-    ctxBg.arc(cx, cy, r + Math.sin(tBg * 2 + r * 0.02) * 28 * (1 + bass), 0, Math.PI * 2);
+    const alpha = 0.05 + Math.abs(Math.sin(tBg * 1.5 + r * 0.01)) * 0.08 + overall * 0.15;
+    ctxBg.strokeStyle = `hsla(${(tBg * 30 + r * 0.5) % 360}, 90%, 55%, ${alpha})`;
+    ctxBg.lineWidth = 1.5 + overall * 3;
+    ctxBg.arc(cx, cy, r + Math.sin(tBg * 2.5 + r * 0.02) * 25 * (1 + bass), 0, Math.PI * 2);
     ctxBg.stroke();
   }
 
-  // ===== Partículas flotantes con brillo (se mueven con el ritmo) =====
-  for (const p of bgParticles) {
+  for (let pi = 0; pi < bgParticles.length; pi++) {
+    const p = bgParticles[pi];
     p.x += p.vx * (1 + overall * 3);
     p.y += p.vy * (1 + overall * 3);
     if (p.x < -10) p.x = w + 10;
@@ -138,26 +122,23 @@ function drawBg() {
     const size = p.size * (1 + bass * 2.5);
     const hue = (p.hue + tBg * 60) % 360;
 
-    // Brillo exterior (glow)
     const grad = ctxBg.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 4);
-    grad.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.55)`);
-    grad.addColorStop(0.5, `hsla(${hue}, 100%, 60%, 0.12)`);
+    grad.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.5)`);
+    grad.addColorStop(0.5, `hsla(${hue}, 100%, 60%, 0.1)`);
     grad.addColorStop(1, `hsla(${hue}, 100%, 50%, 0)`);
-    ctxBg.fillStyle = grad;
+    ctxViz.fillStyle = grad;
     ctxBg.beginPath();
     ctxBg.arc(p.x, p.y, size * 4, 0, Math.PI * 2);
     ctxBg.fill();
 
-    // Núcleo brillante
-    ctxBg.fillStyle = `hsla(${hue}, 100%, 80%, 0.9)`;
+    ctxBg.fillStyle = `hsla(${hue}, 100%, 80%, 0.85)`;
     ctxBg.beginPath();
     ctxBg.arc(p.x, p.y, size, 0, Math.PI * 2);
     ctxBg.fill();
   }
 
   requestAnimationFrame(drawBg);
-}
-drawBg();
+})();
 
 // ============ REPRODUCTOR ============
 let audioCtx, tracks=[], currentIdx=-1, isPlaying=false, hasStarted=false;
@@ -186,7 +167,6 @@ function setupMaster() {
   if (!masterGain) {
     masterGain=ac.createGain(); masterGain.gain.value=0.9;
     analyser=ac.createAnalyser(); analyser.fftSize=256;
-    // Activar fondo reactivo al audio
     bgAudioReactive = true;
     bgFreqData = new Uint8Array(analyser.frequencyBinCount);
     masterGain.connect(analyser); analyser.connect(ac.destination);
@@ -194,6 +174,25 @@ function setupMaster() {
   if (!gainA) { gainA=ac.createGain(); gainA.gain.value=0; gainA.connect(masterGain); }
   if (!gainB) { gainB=ac.createGain(); gainB.gain.value=0; gainB.connect(masterGain); }
 }
+
+function updateBgAudio() {
+  if (bgAudioReactive && bgFreqData && analyser) {
+    try {
+      analyser.getByteFrequencyData(bgFreqData);
+      const bins = bgFreqData.length;
+      let bSum = 0, mSum = 0, tSum = 0;
+      for (let i = 0; i < 8; i++) bSum += bgFreqData[i];
+      for (let i = 8; i < 40; i++) mSum += bgFreqData[i];
+      for (let i = 40; i < bins; i++) tSum += bgFreqData[i];
+      bgBass = bSum / (8 * 255);
+      bgMid = mSum / (32 * 255);
+      bgTreble = tSum / ((bins - 40) * 255);
+      bgOverall = (bgBass * 2 + bgMid + bgTreble) / 4;
+    } catch(e) {}
+  }
+  requestAnimationFrame(updateBgAudio);
+}
+updateBgAudio();
 
 async function loadBufferFromUrl(url) {
   const ac=getAC(); const resp=await fetch(url);
@@ -355,46 +354,121 @@ function handleFirstTouch(e) {
 document.body.addEventListener('click', handleFirstTouch);
 document.body.addEventListener('touchstart', handleFirstTouch);
 
-// ============ VISUALIZADOR ============
+// ============ VISUALIZADOR (círculo perfecto + púas reactivas, más agresivo) ============
 (function drawVisualizer() {
   requestAnimationFrame(drawVisualizer);
-  const w=vizCanvas.width, h=vizCanvas.height;
-  if (!analyser||!isPlaying) {
-    ctxViz.clearRect(0,0,w,h); const bars=32, barWidth=w/bars;
-    for (let i=0;i<bars;i++) {
-      const value=Math.sin(Date.now()*0.005+i*0.5)*0.5+0.5;
-      const barHeight=value*h*0.3;
-      const hue=(Date.now()*0.1+i*10)%360;
-      ctxViz.fillStyle=`hsla(${hue},100%,60%,0.4)`;
-      ctxViz.fillRect(i*barWidth, h-barHeight, barWidth-1, barHeight);
-    }
+  const w = vizCanvas.width, h = vizCanvas.height;
+  const cx = w / 2, cy = h / 2;
+  const baseRadius = Math.min(w, h) * 0.28;
+  const time = Date.now() * 0.008; // rotación más rápida
+
+  ctxViz.clearRect(0, 0, w, h);
+
+  if (!analyser || !isPlaying) {
+    // Estado en pausa: círculo calmado con pulso suave
+    const pulse = Math.sin(time * 0.8) * 4;
+    ctxViz.beginPath();
+    ctxViz.arc(cx, cy, baseRadius + pulse, 0, Math.PI * 2);
+    ctxViz.strokeStyle = 'hsla(180, 100%, 60%, 0.6)';
+    ctxViz.lineWidth = 2.5;
+    ctxViz.stroke();
     return;
   }
-  const bufferLength=analyser.frequencyBinCount;
-  const dataArray=new Uint8Array(bufferLength);
+
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
   analyser.getByteFrequencyData(dataArray);
-  ctxViz.clearRect(0,0,w,h);
-  const centerX=w/2, centerY=h/2, radius=Math.min(w,h)*0.25;
-  const angleStep=(Math.PI*2)/bufferLength;
+
+  // Volumen promedio para el pulso del círculo principal
+  let avg = 0;
+  for (let i = 0; i < bufferLength; i++) avg += dataArray[i];
+  avg = avg / bufferLength / 255;
+
+  // ===== 1. Glow exterior difuso =====
+  const glow = ctxViz.createRadialGradient(cx, cy, baseRadius * 0.5, cx, cy, baseRadius * 1.5);
+  glow.addColorStop(0, 'hsla(180, 100%, 60%, 0.18)');
+  glow.addColorStop(1, 'hsla(180, 100%, 60%, 0)');
+  ctxViz.fillStyle = glow;
   ctxViz.beginPath();
-  for (let i=0;i<bufferLength;i++) {
-    const value=dataArray[i]/255;
-    const angle=i*angleStep;
-    const x=centerX+Math.cos(angle)*radius*(1+value*0.6);
-    const y=centerY+Math.sin(angle)*radius*(1+value*0.6);
-    i===0?ctxViz.moveTo(x,y):ctxViz.lineTo(x,y);
+  ctxViz.arc(cx, cy, baseRadius * 1.5, 0, Math.PI * 2);
+  ctxViz.fill();
+
+  // ===== 2. Círculo principal PERFECTAMENTE redondo (solo cambia tamaño) =====
+  const mainRadius = baseRadius * (0.85 + avg * 0.7);
+  const mainGrad = ctxViz.createRadialGradient(cx, cy, 0, cx, cy, mainRadius);
+  mainGrad.addColorStop(0, 'hsla(300, 100%, 60%, 0.4)');
+  mainGrad.addColorStop(0.6, 'hsla(180, 100%, 70%, 0.55)');
+  mainGrad.addColorStop(1, 'hsla(180, 100%, 60%, 0.9)');
+  ctxViz.fillStyle = mainGrad;
+  ctxViz.beginPath();
+  ctxViz.arc(cx, cy, mainRadius, 0, Math.PI * 2);
+  ctxViz.fill();
+
+  // Borde brillante
+  ctxViz.beginPath();
+  ctxViz.arc(cx, cy, mainRadius, 0, Math.PI * 2);
+  ctxViz.strokeStyle = 'hsla(180, 100%, 85%, 0.95)';
+  ctxViz.lineWidth = 2.5;
+  ctxViz.stroke();
+
+  // ===== 3. Púas reactivas alrededor (rota rápido) =====
+  const spikeCount = 80;
+  for (let i = 0; i < spikeCount; i++) {
+    const value = dataArray[Math.floor(i * bufferLength / spikeCount)] / 255;
+    const angle = (i / spikeCount) * Math.PI * 2 - Math.PI / 2 + time * 1.8;
+    const spikeLen = value * baseRadius * 1.3;
+    const x1 = cx + Math.cos(angle) * mainRadius;
+    const y1 = cy + Math.sin(angle) * mainRadius;
+    const x2 = cx + Math.cos(angle) * (mainRadius + spikeLen);
+    const y2 = cy + Math.sin(angle) * (mainRadius + spikeLen);
+    ctxViz.beginPath();
+    ctxViz.moveTo(x1, y1);
+    ctxViz.lineTo(x2, y2);
+    const hue = (i * 5 + time * 80) % 360;
+    ctxViz.strokeStyle = `hsla(${hue}, 100%, 65%, ${0.6 + value * 0.4})`;
+    ctxViz.lineWidth = 1.5 + value * 2.5;
+    ctxViz.stroke();
+  }
+
+  // ===== 4. Onda media (rota en sentido contrario) =====
+  ctxViz.beginPath();
+  for (let i = 0; i < bufferLength; i++) {
+    const value = dataArray[i] / 255;
+    const angle = (i / bufferLength) * Math.PI * 2 - Math.PI / 2 - time * 1.2;
+    const r = baseRadius * 0.7 + value * baseRadius * 0.4;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    i === 0 ? ctxViz.moveTo(x, y) : ctxViz.lineTo(x, y);
   }
   ctxViz.closePath();
-  const gradient=ctxViz.createLinearGradient(0,0,w,h);
-  gradient.addColorStop(0,'#ff00ff'); gradient.addColorStop(0.5,'#00ffff'); gradient.addColorStop(1,'#ff00ff');
-  ctxViz.strokeStyle=gradient; ctxViz.lineWidth=2; ctxViz.stroke();
-  const barCount=32, barWidth=w/barCount;
-  for (let i=0;i<barCount;i++) {
-    const value=dataArray[Math.floor(i*bufferLength/barCount)]/255;
-    const barHeight=value*h*0.7;
-    const hue=(i*10+Date.now()*0.05)%360;
-    ctxViz.fillStyle=`hsla(${hue},80%,60%,0.5)`;
-    ctxViz.fillRect(i*barWidth, h-barHeight, barWidth-1, barHeight);
+  const waveGrad = ctxViz.createLinearGradient(0, 0, w, h);
+  waveGrad.addColorStop(0, 'hsla(60, 100%, 70%, 0.85)');
+  waveGrad.addColorStop(0.5, 'hsla(180, 100%, 70%, 0.85)');
+  waveGrad.addColorStop(1, 'hsla(300, 100%, 70%, 0.85)');
+  ctxViz.strokeStyle = waveGrad;
+  ctxViz.lineWidth = 1.8;
+  ctxViz.stroke();
+
+  // ===== 5. Núcleo central pulsante =====
+  const coreSize = baseRadius * 0.18 * (0.6 + avg * 2);
+  const coreGrad = ctxViz.createRadialGradient(cx, cy, 0, cx, cy, coreSize);
+  coreGrad.addColorStop(0, 'hsla(60, 100%, 95%, 1)');
+  coreGrad.addColorStop(0.5, 'hsla(60, 100%, 75%, 0.85)');
+  coreGrad.addColorStop(1, 'hsla(60, 100%, 50%, 0)');
+  ctxViz.fillStyle = coreGrad;
+  ctxViz.beginPath();
+  ctxViz.arc(cx, cy, coreSize, 0, Math.PI * 2);
+  ctxViz.fill();
+
+  // ===== 6. Barras de frecuencia abajo (48, más reactivas) =====
+  const barCount = 48;
+  const barWidth = w / barCount;
+  for (let i = 0; i < barCount; i++) {
+    const value = dataArray[Math.floor(i * bufferLength / barCount)] / 255;
+    const barHeight = value * h * 0.5;
+    const hue = (i * 8 + time * 50) % 360;
+    ctxViz.fillStyle = `hsla(${hue}, 100%, 60%, 0.7)`;
+    ctxViz.fillRect(i * barWidth, h - barHeight, barWidth - 1, barHeight);
   }
 })();
 
@@ -437,3 +511,12 @@ acceptBtn.addEventListener('click', (e) => {
 
 // ============ INICIAR CARGA DE PISTAS ============
 initTracks();
+
+
+"velocitytripbydlrx.mp3",
+  "track1.mp3",
+  "track2.mp3",
+  "track3.mp3",
+  "track4.mp3",
+  "disneepzair.mp3",
+  "orangeepzair.mp3"
