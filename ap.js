@@ -1,13 +1,11 @@
 // ============ LISTA DE PISTAS LOCALES ============
 const LOCAL_TRACKS = [
-  
   "track1.mp3",
   "track2.mp3",
   "track3.mp3",
   "track4.mp3",
   "disneepzair.mp3",
-  "orangeepzair.mp3",
-  "velocitytripbydlrx.mp3"
+  "orangeepzair.mp3"
 ];
 
 // ============ CONFIGURACIÓN (NO TOCAR) ============
@@ -16,7 +14,7 @@ const LOGO_TOP_PATH = 'logo_top.png';
 const LOGO_BOTTOM_PATH = 'logo_bottom.png';
 const PAYPAL_URL = 'https://www.paypal.com/donate/?hosted_button_id=TU_ID_DE_BOTON';
 
-// ============ CANVAS DE FONDO (efectos reactivos, aislados del audio) ============
+// ============ CANVAS DE FONDO (optimizado + aislado del audio) ============
 const canvasBg = document.getElementById('psyCanvas'), ctxBg = canvasBg.getContext('2d');
 
 let bgParticles = [];
@@ -29,7 +27,8 @@ function resizeBg() {
   canvasBg.width = innerWidth;
   canvasBg.height = innerHeight;
   const area = canvasBg.width * canvasBg.height;
-  const particleCount = Math.min(35, Math.max(15, Math.floor(area / 40000)));
+  // Partículas reducidas: máximo 22 (antes 35)
+  const particleCount = Math.min(22, Math.max(8, Math.floor(area / 50000)));
   bgParticles = [];
   for (let i = 0; i < particleCount; i++) {
     bgParticles.push({
@@ -42,7 +41,8 @@ function resizeBg() {
       phase: Math.random() * Math.PI * 2
     });
   }
-  const starCount = Math.min(50, Math.max(20, Math.floor(area / 28000)));
+  // Estrellas reducidas: máximo 40 (antes 50)
+  const starCount = Math.min(40, Math.max(15, Math.floor(area / 35000)));
   bgStars = [];
   for (let i = 0; i < starCount; i++) {
     bgStars.push({
@@ -59,85 +59,95 @@ window.addEventListener('resize', resizeBg);
 
 let tBg = 0;
 (function drawBg() {
-  tBg += 0.008;
-  const w = canvasBg.width, h = canvasBg.height;
-  const bass = bgBass;
-  const mid = bgMid;
-  const treble = bgTreble;
-  const overall = bgOverall;
+  try { // try-catch de seguridad por si algo falla, no rompe el script
+    tBg += 0.008;
+    const w = canvasBg.width, h = canvasBg.height;
+    const bass = bgBass;
+    const mid = bgMid;
+    const treble = bgTreble;
+    const overall = bgOverall;
 
-  const baseHue = (tBg * 25) % 360;
-  const g = ctxBg.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h));
-  g.addColorStop(0, `hsl(${baseHue}, 60%, ${4 + overall * 14}%)`);
-  g.addColorStop(0.5, `hsl(${(baseHue + 60) % 360}, 50%, ${2 + overall * 7}%)`);
-  g.addColorStop(1, '#000');
-  ctxBg.fillStyle = g;
-  ctxBg.fillRect(0, 0, w, h);
+    // Fondo base
+    const baseHue = (tBg * 25) % 360;
+    const g = ctxBg.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h));
+    g.addColorStop(0, `hsl(${baseHue}, 60%, ${4 + overall * 14}%)`);
+    g.addColorStop(0.5, `hsl(${(baseHue + 60) % 360}, 50%, ${2 + overall * 7}%)`);
+    g.addColorStop(1, '#000');
+    ctxBg.fillStyle = g;
+    ctxBg.fillRect(0, 0, w, h);
 
-  for (let si = 0; si < bgStars.length; si++) {
-    const star = bgStars[si];
-    const twinkle = Math.sin(tBg * 30 * star.twinkleSpeed + star.phase) * 0.5 + 0.5;
-    const size = star.size * (0.5 + twinkle * 0.8) * (1 + overall * 1.5);
-    const alpha = twinkle * (0.35 + overall * 0.5);
-    ctxBg.fillStyle = `hsla(${(tBg * 40 + star.x * 0.5) % 360}, 85%, 75%, ${alpha})`;
-    ctxBg.beginPath();
-    ctxBg.arc(star.x, star.y, size, 0, Math.PI * 2);
-    ctxBg.fill();
-  }
-
-  for (let i = 0; i < 8; i++) {
-    ctxBg.beginPath();
-    const hue = (tBg * 50 + i * 45) % 360;
-    const amp = (80 + i * 12) * (1 + bass * 1.5);
-    ctxBg.strokeStyle = `hsla(${hue}, 100%, 60%, ${0.1 + bass * 0.25 + mid * 0.1})`;
-    ctxBg.lineWidth = 2 + bass * 2.5;
-    for (let x = 0; x <= w; x += 4) {
-      const y = h/2
-        + Math.sin(x * 0.015 + tBg * 2.5 + i * 0.8) * amp
-        + Math.cos(x * 0.008 + tBg * 1.8 + i * 1.2) * amp * 0.5
-        + Math.sin(x * 0.003 + tBg * 3.5) * amp * 1.3;
-      x === 0 ? ctxBg.moveTo(x, y) : ctxBg.lineTo(x, y);
+    // Estrellas
+    for (let si = 0; si < bgStars.length; si++) {
+      const star = bgStars[si];
+      const twinkle = Math.sin(tBg * 30 * star.twinkleSpeed + star.phase) * 0.5 + 0.5;
+      const size = star.size * (0.5 + twinkle * 0.8) * (1 + overall * 1.5);
+      const alpha = twinkle * (0.35 + overall * 0.5);
+      ctxBg.fillStyle = `hsla(${(tBg * 40 + star.x * 0.5) % 360}, 85%, 75%, ${alpha})`;
+      ctxBg.beginPath();
+      ctxBg.arc(star.x, star.y, size, 0, Math.PI * 2);
+      ctxBg.fill();
     }
-    ctxBg.stroke();
+
+    // Ondas
+    for (let i = 0; i < 8; i++) {
+      ctxBg.beginPath();
+      const hue = (tBg * 50 + i * 45) % 360;
+      const amp = (80 + i * 12) * (1 + bass * 1.5);
+      ctxBg.strokeStyle = `hsla(${hue}, 100%, 60%, ${0.1 + bass * 0.25 + mid * 0.1})`;
+      ctxBg.lineWidth = 2 + bass * 2.5;
+      for (let x = 0; x <= w; x += 4) {
+        const y = h/2
+          + Math.sin(x * 0.015 + tBg * 2.5 + i * 0.8) * amp
+          + Math.cos(x * 0.008 + tBg * 1.8 + i * 1.2) * amp * 0.5
+          + Math.sin(x * 0.003 + tBg * 3.5) * amp * 1.3;
+        x === 0 ? ctxBg.moveTo(x, y) : ctxBg.lineTo(x, y);
+      }
+      ctxBg.stroke();
+    }
+
+    // Círculos concéntricos
+    const cx = w/2, cy = h/2;
+    for (let r = 30; r < Math.max(w, h) * 0.8; r += 50) {
+      ctxBg.beginPath();
+      const alpha = 0.05 + Math.abs(Math.sin(tBg * 1.5 + r * 0.01)) * 0.08 + overall * 0.15;
+      ctxBg.strokeStyle = `hsla(${(tBg * 30 + r * 0.5) % 360}, 90%, 55%, ${alpha})`;
+      ctxBg.lineWidth = 1.5 + overall * 3;
+      ctxBg.arc(cx, cy, r + Math.sin(tBg * 2.5 + r * 0.02) * 25 * (1 + bass), 0, Math.PI * 2);
+      ctxBg.stroke();
+    }
+
+    // Partículas
+    for (let pi = 0; pi < bgParticles.length; pi++) {
+      const p = bgParticles[pi];
+      p.x += p.vx * (1 + overall * 3);
+      p.y += p.vy * (1 + overall * 3);
+      if (p.x < -10) p.x = w + 10;
+      if (p.x > w + 10) p.x = -10;
+      if (p.y < -10) p.y = h + 10;
+      if (p.y > h + 10) p.y = -10;
+
+      const size = p.size * (1 + bass * 2.5);
+      const hue = (p.hue + tBg * 60) % 360;
+
+      // ✅ FIX: ctxBg (antes era ctxViz que causaba el crash)
+      const grad = ctxBg.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 4);
+      grad.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.5)`);
+      grad.addColorStop(0.5, `hsla(${hue}, 100%, 60%, 0.1)`);
+      grad.addColorStop(1, `hsla(${hue}, 100%, 50%, 0)`);
+      ctxBg.fillStyle = grad;
+      ctxBg.beginPath();
+      ctxBg.arc(p.x, p.y, size * 4, 0, Math.PI * 2);
+      ctxBg.fill();
+
+      ctxBg.fillStyle = `hsla(${hue}, 100%, 80%, 0.85)`;
+      ctxBg.beginPath();
+      ctxBg.arc(p.x, p.y, size, 0, Math.PI * 2);
+      ctxBg.fill();
+    }
+  } catch(e) {
+    // Si algo falla en el fondo, no rompe la web
+    console.warn('Background effect error (no crítico):', e.message);
   }
-
-  const cx = w/2, cy = h/2;
-  for (let r = 30; r < Math.max(w, h) * 0.8; r += 50) {
-    ctxBg.beginPath();
-    const alpha = 0.05 + Math.abs(Math.sin(tBg * 1.5 + r * 0.01)) * 0.08 + overall * 0.15;
-    ctxBg.strokeStyle = `hsla(${(tBg * 30 + r * 0.5) % 360}, 90%, 55%, ${alpha})`;
-    ctxBg.lineWidth = 1.5 + overall * 3;
-    ctxBg.arc(cx, cy, r + Math.sin(tBg * 2.5 + r * 0.02) * 25 * (1 + bass), 0, Math.PI * 2);
-    ctxBg.stroke();
-  }
-
-  for (let pi = 0; pi < bgParticles.length; pi++) {
-    const p = bgParticles[pi];
-    p.x += p.vx * (1 + overall * 3);
-    p.y += p.vy * (1 + overall * 3);
-    if (p.x < -10) p.x = w + 10;
-    if (p.x > w + 10) p.x = -10;
-    if (p.y < -10) p.y = h + 10;
-    if (p.y > h + 10) p.y = -10;
-
-    const size = p.size * (1 + bass * 2.5);
-    const hue = (p.hue + tBg * 60) % 360;
-
-    const grad = ctxBg.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 4);
-    grad.addColorStop(0, `hsla(${hue}, 100%, 65%, 0.5)`);
-    grad.addColorStop(0.5, `hsla(${hue}, 100%, 60%, 0.1)`);
-    grad.addColorStop(1, `hsla(${hue}, 100%, 50%, 0)`);
-    ctxViz.fillStyle = grad;
-    ctxBg.beginPath();
-    ctxBg.arc(p.x, p.y, size * 4, 0, Math.PI * 2);
-    ctxBg.fill();
-
-    ctxBg.fillStyle = `hsla(${hue}, 100%, 80%, 0.85)`;
-    ctxBg.beginPath();
-    ctxBg.arc(p.x, p.y, size, 0, Math.PI * 2);
-    ctxBg.fill();
-  }
-
   requestAnimationFrame(drawBg);
 })();
 
@@ -355,18 +365,17 @@ function handleFirstTouch(e) {
 document.body.addEventListener('click', handleFirstTouch);
 document.body.addEventListener('touchstart', handleFirstTouch);
 
-// ============ VISUALIZADOR (círculo perfecto + púas reactivas, más agresivo) ============
+// ============ VISUALIZADOR (círculo perfecto + púas reactivas) ============
 (function drawVisualizer() {
   requestAnimationFrame(drawVisualizer);
   const w = vizCanvas.width, h = vizCanvas.height;
   const cx = w / 2, cy = h / 2;
   const baseRadius = Math.min(w, h) * 0.28;
-  const time = Date.now() * 0.008; // rotación más rápida
+  const time = Date.now() * 0.008;
 
   ctxViz.clearRect(0, 0, w, h);
 
   if (!analyser || !isPlaying) {
-    // Estado en pausa: círculo calmado con pulso suave
     const pulse = Math.sin(time * 0.8) * 4;
     ctxViz.beginPath();
     ctxViz.arc(cx, cy, baseRadius + pulse, 0, Math.PI * 2);
@@ -380,12 +389,11 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   const dataArray = new Uint8Array(bufferLength);
   analyser.getByteFrequencyData(dataArray);
 
-  // Volumen promedio para el pulso del círculo principal
   let avg = 0;
   for (let i = 0; i < bufferLength; i++) avg += dataArray[i];
   avg = avg / bufferLength / 255;
 
-  // ===== 1. Glow exterior difuso =====
+  // Glow
   const glow = ctxViz.createRadialGradient(cx, cy, baseRadius * 0.5, cx, cy, baseRadius * 1.5);
   glow.addColorStop(0, 'hsla(180, 100%, 60%, 0.18)');
   glow.addColorStop(1, 'hsla(180, 100%, 60%, 0)');
@@ -394,7 +402,7 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   ctxViz.arc(cx, cy, baseRadius * 1.5, 0, Math.PI * 2);
   ctxViz.fill();
 
-  // ===== 2. Círculo principal PERFECTAMENTE redondo (solo cambia tamaño) =====
+  // Círculo principal redondo
   const mainRadius = baseRadius * (0.85 + avg * 0.7);
   const mainGrad = ctxViz.createRadialGradient(cx, cy, 0, cx, cy, mainRadius);
   mainGrad.addColorStop(0, 'hsla(300, 100%, 60%, 0.4)');
@@ -405,14 +413,13 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   ctxViz.arc(cx, cy, mainRadius, 0, Math.PI * 2);
   ctxViz.fill();
 
-  // Borde brillante
   ctxViz.beginPath();
   ctxViz.arc(cx, cy, mainRadius, 0, Math.PI * 2);
   ctxViz.strokeStyle = 'hsla(180, 100%, 85%, 0.95)';
   ctxViz.lineWidth = 2.5;
   ctxViz.stroke();
 
-  // ===== 3. Púas reactivas alrededor (rota rápido) =====
+  // Púas reactivas
   const spikeCount = 80;
   for (let i = 0; i < spikeCount; i++) {
     const value = dataArray[Math.floor(i * bufferLength / spikeCount)] / 255;
@@ -431,7 +438,7 @@ document.body.addEventListener('touchstart', handleFirstTouch);
     ctxViz.stroke();
   }
 
-  // ===== 4. Onda media (rota en sentido contrario) =====
+  // Onda media
   ctxViz.beginPath();
   for (let i = 0; i < bufferLength; i++) {
     const value = dataArray[i] / 255;
@@ -450,7 +457,7 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   ctxViz.lineWidth = 1.8;
   ctxViz.stroke();
 
-  // ===== 5. Núcleo central pulsante =====
+  // Núcleo
   const coreSize = baseRadius * 0.18 * (0.6 + avg * 2);
   const coreGrad = ctxViz.createRadialGradient(cx, cy, 0, cx, cy, coreSize);
   coreGrad.addColorStop(0, 'hsla(60, 100%, 95%, 1)');
@@ -461,7 +468,7 @@ document.body.addEventListener('touchstart', handleFirstTouch);
   ctxViz.arc(cx, cy, coreSize, 0, Math.PI * 2);
   ctxViz.fill();
 
-  // ===== 6. Barras de frecuencia abajo (48, más reactivas) =====
+  // Barras
   const barCount = 48;
   const barWidth = w / barCount;
   for (let i = 0; i < barCount; i++) {
@@ -512,5 +519,3 @@ acceptBtn.addEventListener('click', (e) => {
 
 // ============ INICIAR CARGA DE PISTAS ============
 initTracks();
-
-
