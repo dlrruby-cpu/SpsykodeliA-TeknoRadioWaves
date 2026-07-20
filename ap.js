@@ -5,8 +5,8 @@ const LOCAL_TRACKS = [
   "track3.mp3",
   "track4.mp3",
   "disneepzair.mp3",
-  "orangeepzair.mp3"
-];
+  "orangeepzair.mp3",
+  "velocitytripbydlrx.mp3" ];
 
 // ============ CONFIGURACIÓN (NO TOCAR) ============
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
