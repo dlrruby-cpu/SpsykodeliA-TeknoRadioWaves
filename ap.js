@@ -16,12 +16,15 @@ const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp
 const LOGO_TOP_PATH = 'logo_top.png';
 const LOGO_BOTTOM_PATH = 'logo_bottom.png';
 
-// ============ MANEJO DEL MODAL LEGAL (INDEPENDIENTE) ============
+// ============================================================
+// 1. MANEJO DEL MODAL LEGAL (totalmente independiente)
+// ============================================================
 (function setupLegalModal() {
   const modal = document.getElementById('legalModal');
   const acceptBtn = document.getElementById('acceptLegal');
   const statusMsg = document.getElementById('statusMessage');
 
+  // Si ya aceptó, ocultar modal y actualizar mensaje
   if (localStorage.getItem('legalAccepted') === 'true') {
     modal.style.display = 'none';
     if (statusMsg.textContent === 'ACEPTA LOS TÉRMINOS PRIMERO') {
@@ -30,18 +33,44 @@ const LOGO_BOTTOM_PATH = 'logo_bottom.png';
     return;
   }
 
+  // Asegurar que el modal sea visible
   modal.style.display = 'flex';
 
-  acceptBtn.addEventListener('click', function(e) {
+  // Asignar evento al botón Aceptar (con listener robusto)
+  acceptBtn.addEventListener('click', function aceptar(e) {
     e.stopPropagation();
+    e.preventDefault(); // por si acaso
+
+    // Guardar en localStorage
     localStorage.setItem('legalAccepted', 'true');
+
+    // Ocultar modal
     modal.style.display = 'none';
+
+    // Actualizar mensaje de estado
     if (statusMsg.textContent === 'ACEPTA LOS TÉRMINOS PRIMERO') {
       statusMsg.textContent = 'TOCA PARA EMPEZAR';
     }
+
     console.log('✅ Términos aceptados, modal cerrado.');
+
+    // Después de aceptar, si la radio ya se ha cargado, podemos iniciar
+    // Pero eso lo maneja el resto del código.
+  });
+
+  // También podemos cerrar el modal si el usuario hace clic fuera del contenido
+  // pero solo si no es el botón (para evitar conflictos)
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      // No cerramos automáticamente, solo si el usuario hace clic en el fondo
+      // pero no lo forzamos para que sea el botón quien lo cierre.
+    }
   });
 })();
+
+// ============================================================
+// 2. RESTO DE LA LÓGICA (CANVAS, REPRODUCTOR, VISUALIZADOR)
+// ============================================================
 
 // ============ CANVAS DE FONDO ============
 const canvasBg = document.getElementById('psyCanvas'), ctxBg = canvasBg.getContext('2d');
@@ -247,11 +276,13 @@ async function initTracks() {
     if (tracks.length === 0) {
       statusMsg.textContent = 'ERROR: SIN PISTAS';
     } else {
+      // Verificar si ya aceptó términos
       if (localStorage.getItem('legalAccepted') === 'true') {
         statusMsg.textContent = 'TOCA PARA EMPEZAR';
       } else {
         statusMsg.textContent = 'ACEPTA LOS TÉRMINOS PRIMERO';
       }
+      // Si ya se había iniciado (hasStarted) y hay pistas, arrancar
       if (hasStarted && tracks.length > 0) {
         startRadio();
       }
@@ -361,7 +392,11 @@ btnMix.addEventListener('click',(e)=>{ e.stopPropagation(); switchMode('mix'); }
 btnPlaylist.addEventListener('click',(e)=>{ e.stopPropagation(); switchMode('playlist'); });
 
 function handleFirstTouch(e) {
-  if (document.getElementById('legalModal').style.display !== 'none') return;
+  // Si el modal está visible, no hacer nada (el botón aceptar lo cierra)
+  const modal = document.getElementById('legalModal');
+  if (modal.style.display !== 'none') return;
+
+  // Si es un botón de modo o PayPal, salir
   if (e && (e.target === btnMix || e.target === btnPlaylist || e.target.closest('.paypal-btn'))) return;
 
   if (hasStarted) {
@@ -520,5 +555,6 @@ async function loadLogo(path, containerId, hideBrand) {
 loadLogo(LOGO_TOP_PATH, 'logoTopContainer', true);
 loadLogo(LOGO_BOTTOM_PATH, 'logoBottomContainer', false);
 
-// ============ INICIAR CARGA DE PISTAS ============
+// ============ INICIAR CARGA DE PISTAS (después de todo) ============
+// Esto asegura que la carga no bloquee la interfaz y que el modal sea funcional.
 initTracks();
