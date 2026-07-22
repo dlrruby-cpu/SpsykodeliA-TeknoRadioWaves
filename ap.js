@@ -43,16 +43,13 @@ const LOCAL_TRACKS = [
   "track4_accionv1_psykodeliatkno.mp3",
   "track5_velocity_pskodeliateknowaves.mp3",
   "track6_healingfrequencys_psykodeliateknowaves.mp3",
-"track7_Cuoredirave_Valmad.mp3",
-
-"track8_expaciux_xailor.mp3",
-
-"track9_Cuoredirave_Valmad.mp3",
-
-"track10_Cuoredirave_Valmad.mp3",
-"Track11_liveMix_dalørex.mp3",
-
-];
+  "track7_Cuoredirave_Valmad.mp3",
+  "track8_expaciux_xailor.mp3",
+  "track9_Cuoredirave_Valmad.mp3",
+  "track10_Cuoredirave_Valmad.mp3",
+  "Track11_liveMix_dalørex.mp3"
+  
+]; 
 
 
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
