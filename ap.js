@@ -47,7 +47,7 @@ const LOCAL_TRACKS = [
   "track8_expaciux_xailor.mp3",
   "track9_Cuoredirave_Valmad.mp3",
   "track10_Cuoredirave_Valmad.mp3",
-  "Track11_liveMix_dalørex.mp3"
+  "track11_livemix_dalørex.mp3"
   
 ]; 
 
