@@ -45,7 +45,7 @@ const DONATION_ITEM = 'Donación PsikodeliA TeknoRadio';
 // ============================================================
 const LOCAL_TRACKS = [
   
-  "track1_liveonthebeat_dalorex.mp3",
+  "track1_liveonthebeat_dalørex.mp3",
   "track2_Disneep_zair.mp3",
   "track3_fuckwarsep_zair.mp3",
   "track4_accionv1_psykodeliatkno.mp3",
@@ -644,7 +644,7 @@ initTracks();
 // ============================================================
 // 8. CONFIGURACIÓN DE DONACIONES - EMAIL: dlrx75@gmail.com
 // ============================================================
-console.log('💛 Configuración de donaciones:');
+console.log('☕ Configuración de donaciones:');
 console.log('   Email PayPal: ' + DONATION_EMAIL);
 console.log('   Moneda: ' + DONATION_CURRENCY);
 console.log('   Concepto: ' + DONATION_ITEM);
