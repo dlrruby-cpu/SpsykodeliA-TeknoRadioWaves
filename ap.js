@@ -44,7 +44,8 @@ const DONATION_ITEM = 'Donación PsikodeliA TeknoRadio';
 // 2. LISTA DE PISTAS (ACTUALIZADA CON NUEVOS NOMBRES)
 // ============================================================
 const LOCAL_TRACKS = [
-  "track1_Disneep_zair.mp3",
+  
+  "track1_liveonthebeat_dalorex.mp3",
   "track2_Disneep_zair.mp3",
   "track3_fuckwarsep_zair.mp3",
   "track4_accionv1_psykodeliatkno.mp3",
@@ -53,10 +54,12 @@ const LOCAL_TRACKS = [
   "track7_Cuoredirave_Valmad.mp3",
   "track8_expaciux_xailor.mp3",
   "track9_Cuoredirave_Valmad.mp3",
-  "track10_Cuoredirave_Valmad.mp3",
-  "track11_livemix_dalørex.mp3"
-  
-]; 
+  "track10_livemix_dalørex.mp3"
+
+
+];
+
+
 
 
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
