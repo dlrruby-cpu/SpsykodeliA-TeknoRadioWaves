@@ -1,9 +1,9 @@
 // ============================================================
 // CONFIGURACIÓN DE DONACIONES
 // ============================================================
-const DONATION_EMAIL = 'dlrx75@gmail.com';
+const DONATION_EMAIL = 'dlr.ruby@gmail.com';
 const DONATION_CURRENCY = 'EUR';
-const DONATION_ITEM = 'Donación PsikodeliA TeknoRadio';
+const DONATION_ITEM = 'PsykodeliA TeknoRadio';
 
 // ============================================================
 // 1. MANEJO DEL MODAL LEGAL (INDEPENDIENTE Y ROBUSTO)
@@ -644,7 +644,7 @@ initTracks();
 // ============================================================
 // 8. CONFIGURACIÓN DE DONACIONES - EMAIL: dlrx75@gmail.com
 // ============================================================
-console.log('☕ Configuración de donaciones:');
-console.log('   Email PayPal: ' + DONATION_EMAIL);
-console.log('   Moneda: ' + DONATION_CURRENCY);
-console.log('   Concepto: ' + DONATION_ITEM);
+console.log(' Configuración de donaciones: ☕');
+console.log('   Email PayPal: dlr.ruby@gmail.com');
+console.log('   Moneda:EUR');
+console.log('   Concepto: PsykodeliA TeknoRadio');
