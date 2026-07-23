@@ -1,4 +1,4 @@
-# PsykødeliA-TeknøRadiø
+# PsykodeliA TeknoRadioWaves
 Versión:Beta
 Gratis y sin registros.
 Música Techno Dance 24/7
