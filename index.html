@@ -15,108 +15,58 @@
       padding:3vh 0 3vh 0; overflow:hidden;
     }
 
-    /* LOGO PRINCIPAL */
     .logo-top-container {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:100px;
-      width:100%;
-      padding:2vh 5%;
-      margin:1vh 0;
-      z-index:15;
+      display:flex; align-items:center; justify-content:center;
+      min-height:100px; width:100%; padding:2vh 5%; margin:1vh 0; z-index:15;
     }
     .logo-top-container img {
-      max-height:110px;
-      width:auto;
-      object-fit:contain;
-      filter: drop-shadow(0 0 15px rgba(255,0,255,0.5)) drop-shadow(0 0 30px rgba(200,0,200,0.3));
-      transition: all 0.3s ease;
-    }
-    .logo-top-container img:hover {
-      filter: drop-shadow(0 0 20px rgba(255,0,255,0.7)) drop-shadow(0 0 40px rgba(200,0,200,0.5));
-      transform: scale(1.05);
+      max-height:110px; width:auto; object-fit:contain;
+      filter: drop-shadow(0 0 15px rgba(255,0,255,0.5));
     }
 
-    /* PANTALLA VISUALIZADOR (reproductor) */
+    /* PANTALLA DEL REPRODUCTOR */
     .display-screen { 
-      width:95%; 
-      height:40%; 
-      max-height:45vh; 
+      width:95%; height:40%; max-height:45vh; 
       background:linear-gradient(180deg, #0d0a0d 0%, #030103 100%); 
-      border-top:2px solid #5a3a5a; 
-      border-bottom:2px solid #5a3a5a; 
+      border-top:2px solid #5a3a5a; border-bottom:2px solid #5a3a5a; 
       box-shadow:inset 0 0 30px #000000, 0 0 20px #ff00ff44; 
-      display:flex; 
-      flex-direction:column; 
-      align-items:center; 
-      justify-content:center; 
-      position:relative; 
-      overflow:hidden; 
-      cursor:pointer;
-      margin:2vh 0;
-      border-radius:8px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; 
+      position:relative; overflow:hidden; cursor:pointer;
+      margin:2vh 0; border-radius:8px;
     }
     .visualizer-canvas { width:100%; height:100%; position:absolute; top:0; left:0; }
     .status-message { 
       position:absolute; bottom:10%; left:0; width:100%; text-align:center; 
       font-size:clamp(0.6rem, 2.2vw, 0.9rem); color:#ff66ff; 
-      text-shadow:0 0 15px #ff00ff, 0 0 30px #ff00ff88; 
-      letter-spacing:2px; font-weight:bold; pointer-events:none; z-index:10; 
-      white-space:nowrap; overflow:hidden; 
+      text-shadow:0 0 15px #ff00ff; letter-spacing:2px; 
+      font-weight:bold; pointer-events:none; z-index:10; 
     }
 
-    /* BOTONES DE MODO */
     .mode-selectors { display:flex; gap:1.5rem; margin:1vh 0; z-index:20; }
     .mode-btn { 
       background:linear-gradient(180deg, #2a1a2a 0%, #1a0f1a 100%); 
-      border:2px solid #5a4a5a; 
-      border-radius:12px; 
-      padding:0.5rem 1.2rem; 
-      font-family:'Courier New',monospace; 
-      font-weight:bold; 
-      font-size:clamp(0.7rem, 2vw, 0.9rem); 
-      letter-spacing:2px; 
-      color:#886688; 
-      text-shadow:0 1px 0 #00000088, 0 -1px 0 #ffffff22; 
-      box-shadow:inset 0 2px 5px rgba(0,0,0,0.8), 0 3px 6px rgba(0,0,0,0.6); 
-      cursor:pointer; 
-      transition:all 0.2s ease; 
-      text-transform:lowercase; 
-      outline:none; 
-      user-select:none; 
-      -webkit-tap-highlight-color:transparent; 
+      border:2px solid #5a4a5a; border-radius:12px; 
+      padding:0.5rem 1.2rem; font-family:'Courier New',monospace; 
+      font-weight:bold; font-size:clamp(0.7rem, 2vw, 0.9rem); 
+      letter-spacing:2px; color:#886688; cursor:pointer; 
+      transition:all 0.2s ease; text-transform:lowercase; outline:none; 
     }
     .mode-btn.active { 
-      color:#00ffff; 
-      text-shadow:0 0 12px #00ffff, 0 0 25px #00ffff; 
-      border-color:#00ffff; 
-      box-shadow:0 0 15px #00ffff88, inset 0 0 8px #00ffff44; 
+      color:#00ffff; text-shadow:0 0 12px #00ffff; 
+      border-color:#00ffff; box-shadow:0 0 15px #00ffff88; 
       background:linear-gradient(180deg, #1a2a2a 0%, #0a1a1a 100%); 
     }
 
-    /* BOTÓN CAFÉ/PAYPAL */
     .paypal-btn { 
       position:absolute; bottom:12px; left:12px; 
-      background:rgba(255,255,255,0.08); 
-      color:#888; 
-      font-weight:normal; 
-      padding:4px 10px; 
-      border-radius:12px; 
-      text-decoration:none; 
-      font-size:0.6rem; 
-      border:1px solid rgba(255,255,255,0.15); 
-      box-shadow:0 0 8px rgba(255,255,255,0.05); 
-      z-index:25; 
-      letter-spacing:0.5px; 
-      cursor:pointer; 
-      display:block !important; 
-      transition:0.2s; 
-      backdrop-filter:blur(4px); 
+      background:rgba(255,255,255,0.08); color:#888; 
+      padding:4px 10px; border-radius:12px; text-decoration:none; 
+      font-size:0.6rem; border:1px solid rgba(255,255,255,0.15); 
+      z-index:25; letter-spacing:0.5px; cursor:pointer; 
     }
     .paypal-btn:hover { background:rgba(255,255,255,0.15); color:#ccc; }
 
-    /* MODAL LEGAL */
+    /* MODAL LEGAL (visible por defecto, se oculta con JS) */
     .legal-modal { 
       position:fixed; top:0; left:0; width:100%; height:100%; 
       background:rgba(0,0,0,0.95); z-index:1000; 
@@ -129,7 +79,7 @@
     }
     .legal-content h2 { color:#ff00ff; margin-bottom:1rem; }
     .legal-content p { font-size:0.8rem; margin:0.5rem 0; line-height:1.4; }
-    .legal-content a { color:#00ffff; }
+    .legal-content a { color:#00ffff; text-decoration:underline; cursor:pointer; }
     .legal-btn { 
       background:#ff00ff; border:none; color:#000; font-weight:bold; 
       padding:0.7rem 2rem; border-radius:30px; cursor:pointer; 
@@ -141,42 +91,41 @@
       .radio-body { padding:2vh 0; }
       .mode-btn { padding:0.3rem 0.7rem; font-size:0.65rem; }
       .display-screen { height:60%; }
-      .logo-top-container { min-height:70px; padding:1vh 5%; }
+      .logo-top-container { min-height:70px; }
       .logo-top-container img { max-height:80px; }
-    }
-    @media (min-width:768px) {
-      .logo-top-container img { max-height:130px; }
-      .display-screen { height:45%; }
     }
   </style>
 </head>
 <body>
-  <div class="radio-body" role="application">
+  <div class="radio-body">
     <!-- LOGO PRINCIPAL -->
     <div id="logoTopContainer" class="logo-top-container">☢️</div>
 
-    <!-- PANTALLA DEL REPRODUCTOR (aquí está el visualizador completo) -->
+    <!-- VISOR DEL REPRODUCTOR -->
     <div class="display-screen" id="screenBtn">
       <canvas class="visualizer-canvas" id="vizCanvas"></canvas>
       <div class="status-message" id="statusMessage">ACEPTA LOS TÉRMINOS PRIMERO</div>
     </div>
 
-    <!-- BOTONES DE MODO -->
+    <!-- BOTONES MODO -->
     <div class="mode-selectors">
       <button class="mode-btn active" id="btnMix">MiX</button>
       <button class="mode-btn" id="btnPlaylist">SET</button>
     </div>
     
-    <!-- BOTÓN CAFÉ -->
-    <a class="paypal-btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=dlr.ruby@gmail.com&item_name=Donaci%C3%B3n+PsikodeliA+TeknoRadio&currency_code=EUR" target="_blank" rel="noopener noreferrer">☕</a>
+    <!-- CAFÉ / PAYPAL -->
+    <a class="paypal-btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=dlr.ruby@gmail.com&item_name=Donaci%C3%B3n+PsikodeliA+TeknoRadio&currency_code=EUR" target="_blank">☕</a>
   </div>
 
-  <!-- MODAL LEGAL -->
+  <!-- MODAL LEGAL (se oculta vía JS) -->
   <div class="legal-modal" id="legalModal">
     <div class="legal-content">
       <h2>PsykodeliA TeknoRadio™</h2>
       <p>Usamos cookies técnicas para el reproductor.</p>
-      <p>Al continuar aceptas nuestra <a href="#">Política de Privacidad</a> y <a href="#">Términos de Uso</a>.</p>
+      <p>Al continuar aceptas nuestra 
+         <a id="linkPrivacy" href="#">Política de Privacidad</a> y 
+         <a id="linkTerms" href="#">Términos de Uso</a>.
+      </p>
       <p>Si quieres puedes apoyar el proyecto ☕.</p>
       <button class="legal-btn" id="acceptLegalBtn">Aceptar</button>
     </div>
