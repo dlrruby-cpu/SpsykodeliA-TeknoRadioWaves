@@ -1,407 +1,187 @@
-// ============================================================
-// MANEJO DEL MODAL LEGAL
-// ============================================================
-(function setupLegalModal() {
-  const modal = document.getElementById('legalModal');
-  const acceptBtn = document.getElementById('acceptLegalBtn');
-  const statusMsg = document.getElementById('statusMessage');
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>PsykødeliA TeknøRadiø™</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100%; overflow:hidden; background:#0a0a0a; font-family:'Courier New',monospace; touch-action:manipulation; -webkit-tap-highlight-color:transparent; user-select:none; }
 
-  if (localStorage.getItem('legalAccepted') === 'true') {
-    modal.style.display = 'none';
-    if (statusMsg.textContent === 'ACEPTA LOS TÉRMINOS PRIMERO') {
-      statusMsg.textContent = 'TOCA PARA EMPEZAR';
+    .radio-body {
+      position:absolute; top:0; left:0; width:100%; height:100%; z-index:10;
+      background:#0a0a0a;
+      display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+      padding:3vh 0 3vh 0; overflow:hidden;
     }
-    return;
-  }
 
-  modal.style.display = 'flex';
-
-  acceptBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    localStorage.setItem('legalAccepted', 'true');
-    modal.style.display = 'none';
-    statusMsg.textContent = 'TOCA PARA EMPEZAR';
-    if (typeof startRadio === 'function' && tracks && tracks.length > 0) {
-      startRadio();
+    /* LOGO PRINCIPAL */
+    .logo-top-container {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100px;
+      width:100%;
+      padding:2vh 5%;
+      margin:1vh 0;
+      z-index:15;
     }
-  });
-})();
-
-// ============================================================
-// LISTA DE PISTAS
-// ============================================================
-const LOCAL_TRACKS = [
-  "track1_liveonthebeat_dalørex.mp3",
-  "track2_raveep1_psykodelialabtekno.mp3",
-  "track3_fuckwarsep_zair.mp3",
-  "track4_accionv1_psykodeliatkno.mp3",
-  "track5_velocity_pskodeliateknowaves.mp3",
-  "track6_healingfrequencys_psykodeliateknowaves.mp3",
-  "track7_Cuoredirave_Valmad.mp3",
-  "track8_expaciux_xailor.mp3",
-  "track9_raveep1_psykodelialabtekno.mp3",
-  "track10_Raveep1_psykodelialabtekno.mp3"
-];
-
-const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-const LOGO_TOP_PATH = 'logo_top.png';
-
-// ============================================================
-// REPRODUCTOR DE AUDIO
-// ============================================================
-let audioCtx, tracks = [], currentIdx = -1, isPlaying = false, hasStarted = false;
-let gainA, gainB, sourceA, sourceB, activeGain = 'A', masterGain, mixTimer, analyser;
-let currentMode = 'mix';
-const MIX_SEGMENT = 144;
-const MIX_CROSSFADE = 15;
-const PLAYLIST_CROSSFADE = 8;
-const vizCanvas = document.getElementById('vizCanvas');
-const ctxViz = vizCanvas.getContext('2d');
-const statusMsg = document.getElementById('statusMessage');
-const btnMix = document.getElementById('btnMix');
-const btnPlaylist = document.getElementById('btnPlaylist');
-let deckA = { source: null, gain: null, startTime: 0, offset: 0 };
-let deckB = { source: null, gain: null, startTime: 0, offset: 0 };
-
-function resizeVizCanvas() {
-  const rect = vizCanvas.parentElement.getBoundingClientRect();
-  vizCanvas.width = rect.width;
-  vizCanvas.height = rect.height;
-}
-resizeVizCanvas();
-window.addEventListener('resize', resizeVizCanvas);
-
-function getAC() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  return audioCtx;
-}
-
-function setupMaster() {
-  const ac = getAC();
-  if (!masterGain) {
-    masterGain = ac.createGain();
-    masterGain.gain.value = 0.9;
-    analyser = ac.createAnalyser();
-    analyser.fftSize = 256;
-    masterGain.connect(analyser);
-    analyser.connect(ac.destination);
-  }
-  if (!gainA) { gainA = ac.createGain(); gainA.gain.value = 0; gainA.connect(masterGain); }
-  if (!gainB) { gainB = ac.createGain(); gainB.gain.value = 0; gainB.connect(masterGain); }
-}
-
-async function loadBufferFromUrl(url) {
-  const ac = getAC();
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  const buf = await resp.arrayBuffer();
-  return await ac.decodeAudioData(buf);
-}
-
-async function loadTracks(urlList) {
-  for (const url of urlList) {
-    try {
-      const buffer = await loadBufferFromUrl(url);
-      const name = url.split('/').pop().replace(/\.[^/.]+$/, "").toUpperCase();
-      tracks.push({ name, url, duration: buffer.duration, buffer });
-      console.log('✅ Cargada: ' + name);
-    } catch (e) {
-      console.warn('❌ Falló: ' + url, e.message);
+    .logo-top-container img {
+      max-height:110px;
+      width:auto;
+      object-fit:contain;
+      filter: drop-shadow(0 0 15px rgba(255,0,255,0.5)) drop-shadow(0 0 30px rgba(200,0,200,0.3));
+      transition: all 0.3s ease;
     }
-  }
-}
-
-async function initTracks() {
-  try {
-    statusMsg.textContent = 'CARGANDO PISTAS...';
-    await loadTracks(LOCAL_TRACKS);
-    if (tracks.length === 0) {
-      statusMsg.textContent = 'USANDO DEMO...';
-      await loadTracks([DEMO_TRACK]);
+    .logo-top-container img:hover {
+      filter: drop-shadow(0 0 20px rgba(255,0,255,0.7)) drop-shadow(0 0 40px rgba(200,0,200,0.5));
+      transform: scale(1.05);
     }
-    if (tracks.length === 0) {
-      statusMsg.textContent = 'ERROR: SIN PISTAS';
-    } else {
-      if (localStorage.getItem('legalAccepted') === 'true') {
-        statusMsg.textContent = 'TOCA PARA EMPEZAR';
-      } else {
-        statusMsg.textContent = 'ACEPTA LOS TÉRMINOS PRIMERO';
-      }
-      if (hasStarted && tracks.length > 0) {
-        startRadio();
-      }
+
+    /* PANTALLA VISUALIZADOR (reproductor) */
+    .display-screen { 
+      width:95%; 
+      height:40%; 
+      max-height:45vh; 
+      background:linear-gradient(180deg, #0d0a0d 0%, #030103 100%); 
+      border-top:2px solid #5a3a5a; 
+      border-bottom:2px solid #5a3a5a; 
+      box-shadow:inset 0 0 30px #000000, 0 0 20px #ff00ff44; 
+      display:flex; 
+      flex-direction:column; 
+      align-items:center; 
+      justify-content:center; 
+      position:relative; 
+      overflow:hidden; 
+      cursor:pointer;
+      margin:2vh 0;
+      border-radius:8px;
     }
-  } catch (e) {
-    console.error('Error en initTracks:', e);
-    statusMsg.textContent = 'ERROR AL CARGAR';
-  }
-}
-
-function stopSource(src) {
-  if (src) {
-    try { src.stop(); } catch (e) {}
-    src.disconnect();
-  }
-}
-
-function stopAll() {
-  stopSource(sourceA);
-  sourceA = null;
-  stopSource(sourceB);
-  sourceB = null;
-  if (mixTimer) clearTimeout(mixTimer);
-}
-
-function transitionToNext() {
-  if (!isPlaying || tracks.length === 0) return;
-  const nextIdx = (currentIdx + 1) % tracks.length;
-  const otherGain = activeGain === 'A' ? gainB : gainA;
-  const currentGain = activeGain === 'A' ? gainA : gainB;
-
-  stopSource(activeGain === 'A' ? sourceB : sourceA);
-
-  const source = playSegment(otherGain, nextIdx, 0, 0.001);
-  if (source) {
-    if (activeGain === 'A') {
-      sourceB = source;
-      activeGain = 'B';
-      deckB = { source, gain: gainB, startTime: audioCtx.currentTime, offset: 0 };
-    } else {
-      sourceA = source;
-      activeGain = 'A';
-      deckA = { source, gain: gainA, startTime: audioCtx.currentTime, offset: 0 };
+    .visualizer-canvas { width:100%; height:100%; position:absolute; top:0; left:0; }
+    .status-message { 
+      position:absolute; bottom:10%; left:0; width:100%; text-align:center; 
+      font-size:clamp(0.6rem, 2.2vw, 0.9rem); color:#ff66ff; 
+      text-shadow:0 0 15px #ff00ff, 0 0 30px #ff00ff88; 
+      letter-spacing:2px; font-weight:bold; pointer-events:none; z-index:10; 
+      white-space:nowrap; overflow:hidden; 
     }
-    currentIdx = nextIdx;
-    const duration = currentMode === 'mix' ? MIX_CROSSFADE : PLAYLIST_CROSSFADE;
-    crossfadeVolumes(currentGain, otherGain, duration);
-    scheduleNext();
-    statusMsg.textContent = tracks[currentIdx].name;
-  }
-}
 
-function playSegment(gainNode, trackIndex, startOffset, initialVol) {
-  const ac = getAC();
-  setupMaster();
-  if (trackIndex < 0 || trackIndex >= tracks.length) return null;
-  const track = tracks[trackIndex];
-  const source = ac.createBufferSource();
-  source.buffer = track.buffer;
-  source.connect(gainNode);
-  const now = ac.currentTime;
-  source.start(0, startOffset);
-  gainNode.gain.cancelScheduledValues(now);
-  gainNode.gain.setValueAtTime(initialVol, now);
-
-  source.onended = function() {
-    if (isPlaying && currentIdx === trackIndex) {
-      if (mixTimer) clearTimeout(mixTimer);
-      transitionToNext();
+    /* BOTONES DE MODO */
+    .mode-selectors { display:flex; gap:1.5rem; margin:1vh 0; z-index:20; }
+    .mode-btn { 
+      background:linear-gradient(180deg, #2a1a2a 0%, #1a0f1a 100%); 
+      border:2px solid #5a4a5a; 
+      border-radius:12px; 
+      padding:0.5rem 1.2rem; 
+      font-family:'Courier New',monospace; 
+      font-weight:bold; 
+      font-size:clamp(0.7rem, 2vw, 0.9rem); 
+      letter-spacing:2px; 
+      color:#886688; 
+      text-shadow:0 1px 0 #00000088, 0 -1px 0 #ffffff22; 
+      box-shadow:inset 0 2px 5px rgba(0,0,0,0.8), 0 3px 6px rgba(0,0,0,0.6); 
+      cursor:pointer; 
+      transition:all 0.2s ease; 
+      text-transform:lowercase; 
+      outline:none; 
+      user-select:none; 
+      -webkit-tap-highlight-color:transparent; 
     }
-  };
-
-  if (currentMode === 'mix') {
-    const playDuration = Math.min(MIX_SEGMENT, track.duration - startOffset);
-    source.stop(now + playDuration);
-    if (mixTimer) clearTimeout(mixTimer);
-    const wait = Math.max(0, playDuration - MIX_CROSSFADE);
-    mixTimer = setTimeout(() => {
-      if (isPlaying && currentMode === 'mix') {
-        transitionToNext();
-      }
-    }, wait * 1000);
-  }
-
-  return source;
-}
-
-function crossfadeVolumes(fromGain, toGain, duration) {
-  const ac = getAC();
-  const now = ac.currentTime;
-  fromGain.gain.cancelScheduledValues(now);
-  fromGain.gain.setValueAtTime(fromGain.gain.value || 0.9, now);
-  fromGain.gain.linearRampToValueAtTime(0.001, now + duration);
-  toGain.gain.cancelScheduledValues(now);
-  toGain.gain.setValueAtTime(0.001, now);
-  toGain.gain.linearRampToValueAtTime(0.9, now + duration);
-}
-
-function scheduleNext() {
-  if (!isPlaying || tracks.length === 0) return;
-  if (mixTimer) clearTimeout(mixTimer);
-
-  const currentDeck = activeGain === 'A' ? deckA : deckB;
-  const currentTrack = tracks[currentIdx];
-  if (!currentTrack || !currentDeck.source) {
-    setTimeout(() => { if (isPlaying) transitionToNext(); }, 500);
-    return;
-  }
-
-  const elapsed = audioCtx.currentTime - currentDeck.startTime + currentDeck.offset;
-  let remaining;
-  if (currentMode === 'mix') {
-    remaining = MIX_SEGMENT - elapsed;
-  } else {
-    remaining = currentTrack.duration - elapsed;
-  }
-
-  const crossfadeTime = currentMode === 'mix' ? MIX_CROSSFADE : PLAYLIST_CROSSFADE;
-  if (remaining <= crossfadeTime + 0.5) {
-    setTimeout(() => { if (isPlaying) transitionToNext(); }, 100);
-    return;
-  }
-
-  const wait = remaining - crossfadeTime;
-  mixTimer = setTimeout(() => {
-    if (isPlaying) transitionToNext();
-  }, wait * 1000);
-}
-
-function startRadio() {
-  if (tracks.length === 0) return;
-  getAC();
-  setupMaster();
-  stopAll();
-
-  if (currentIdx < 0 || currentIdx >= tracks.length) currentIdx = 0;
-
-  const source = playSegment(gainA, currentIdx, 0, 0.9);
-  if (source) {
-    sourceA = source;
-    activeGain = 'A';
-    deckA = { source, gain: gainA, startTime: audioCtx.currentTime, offset: 0 };
-    isPlaying = true;
-    statusMsg.textContent = tracks[currentIdx].name;
-    scheduleNext();
-  }
-}
-
-function switchMode(mode) {
-  if (currentMode === mode || tracks.length === 0) return;
-  currentMode = mode;
-  btnMix.classList.toggle('active', mode === 'mix');
-  btnPlaylist.classList.toggle('active', mode === 'playlist');
-  if (isPlaying) {
-    stopAll();
-    startRadio();
-  }
-}
-
-btnMix.addEventListener('click', function(e) {
-  e.stopPropagation();
-  switchMode('mix');
-});
-btnPlaylist.addEventListener('click', function(e) {
-  e.stopPropagation();
-  switchMode('playlist');
-});
-
-function handleFirstTouch(e) {
-  if (document.getElementById('legalModal').style.display !== 'none') return;
-  if (e.target === btnMix || e.target === btnPlaylist || e.target.closest('.paypal-btn')) return;
-
-  if (hasStarted) {
-    if (e.target.closest('.display-screen') || e.target.id === 'vizCanvas') {
-      if (isPlaying) {
-        stopAll();
-        isPlaying = false;
-        statusMsg.textContent = 'PAUSA';
-      } else {
-        startRadio();
-      }
+    .mode-btn.active { 
+      color:#00ffff; 
+      text-shadow:0 0 12px #00ffff, 0 0 25px #00ffff; 
+      border-color:#00ffff; 
+      box-shadow:0 0 15px #00ffff88, inset 0 0 8px #00ffff44; 
+      background:linear-gradient(180deg, #1a2a2a 0%, #0a1a1a 100%); 
     }
-    return;
-  }
 
-  getAC();
-  hasStarted = true;
-  if (tracks.length === 0) {
-    initTracks().then(() => {
-      if (tracks.length > 0) startRadio();
-    });
-  } else {
-    startRadio();
-  }
-}
-
-document.body.addEventListener('click', handleFirstTouch);
-document.body.addEventListener('touchstart', handleFirstTouch);
-
-// ============================================================
-// VISUALIZADOR SIMPLE
-// ============================================================
-function drawVisualizer() {
-  requestAnimationFrame(drawVisualizer);
-  const w = vizCanvas.width, h = vizCanvas.height;
-  const cx = w / 2, cy = h / 2;
-  const baseRadius = Math.min(w, h) * 0.25;
-  const time = Date.now() * 0.008;
-
-  ctxViz.clearRect(0, 0, w, h);
-
-  if (!analyser || !isPlaying) {
-    const pulse = Math.sin(time * 0.8) * 4;
-    ctxViz.beginPath();
-    ctxViz.arc(cx, cy, baseRadius + pulse, 0, Math.PI * 2);
-    ctxViz.strokeStyle = 'rgba(0,255,255,0.6)';
-    ctxViz.lineWidth = 2;
-    ctxViz.stroke();
-    return;
-  }
-
-  const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-  analyser.getByteFrequencyData(dataArray);
-
-  let avg = 0;
-  for (let i = 0; i < bufferLength; i++) avg += dataArray[i];
-  avg = avg / bufferLength / 255;
-
-  // Círculo central reactivo
-  const mainRadius = baseRadius * (0.85 + avg * 0.7);
-  ctxViz.beginPath();
-  ctxViz.arc(cx, cy, mainRadius, 0, Math.PI * 2);
-  ctxViz.fillStyle = 'rgba(0,255,255,0.2)';
-  ctxViz.fill();
-  ctxViz.strokeStyle = 'rgba(0,255,255,0.8)';
-  ctxViz.lineWidth = 2;
-  ctxViz.stroke();
-
-  // Barras de frecuencia
-  const barCount = 48;
-  const barWidth = w / barCount;
-  for (let i = 0; i < barCount; i++) {
-    const value = dataArray[Math.floor(i * bufferLength / barCount)] / 255;
-    const barHeight = value * h * 0.3;
-    ctxViz.fillStyle = `rgba(0,255,255,0.6)`;
-    ctxViz.fillRect(i * barWidth, h - barHeight, barWidth - 1, barHeight);
-  }
-}
-drawVisualizer();
-
-// ============================================================
-// LOGO PRINCIPAL
-// ============================================================
-async function loadLogo(path, containerId) {
-  try {
-    const resp = await fetch(path);
-    if (!resp.ok) return;
-    const blob = await resp.blob();
-    const url = URL.createObjectURL(blob);
-    const img = document.createElement('img');
-    img.src = url;
-    img.alt = 'Logo';
-    const target = document.getElementById(containerId);
-    if (target) {
-      target.innerHTML = '';
-      target.appendChild(img);
+    /* BOTÓN CAFÉ/PAYPAL */
+    .paypal-btn { 
+      position:absolute; bottom:12px; left:12px; 
+      background:rgba(255,255,255,0.08); 
+      color:#888; 
+      font-weight:normal; 
+      padding:4px 10px; 
+      border-radius:12px; 
+      text-decoration:none; 
+      font-size:0.6rem; 
+      border:1px solid rgba(255,255,255,0.15); 
+      box-shadow:0 0 8px rgba(255,255,255,0.05); 
+      z-index:25; 
+      letter-spacing:0.5px; 
+      cursor:pointer; 
+      display:block !important; 
+      transition:0.2s; 
+      backdrop-filter:blur(4px); 
     }
-  } catch (e) { console.warn('Logo no encontrado:', path); }
-}
-loadLogo(LOGO_TOP_PATH, 'logoTopContainer');
+    .paypal-btn:hover { background:rgba(255,255,255,0.15); color:#ccc; }
 
-// ============================================================
-// INICIO DE CARGA DE PISTAS
-// ============================================================
-initTracks();
+    /* MODAL LEGAL */
+    .legal-modal { 
+      position:fixed; top:0; left:0; width:100%; height:100%; 
+      background:rgba(0,0,0,0.95); z-index:1000; 
+      display:flex; align-items:center; justify-content:center; color:#fff; 
+    }
+    .legal-content { 
+      background:#1a0a1a; border:2px solid #ff00ff; border-radius:20px; 
+      padding:2rem; max-width:350px; text-align:center; 
+      font-family:'Courier New',monospace; 
+    }
+    .legal-content h2 { color:#ff00ff; margin-bottom:1rem; }
+    .legal-content p { font-size:0.8rem; margin:0.5rem 0; line-height:1.4; }
+    .legal-content a { color:#00ffff; }
+    .legal-btn { 
+      background:#ff00ff; border:none; color:#000; font-weight:bold; 
+      padding:0.7rem 2rem; border-radius:30px; cursor:pointer; 
+      margin-top:1rem; font-family:'Courier New',monospace; 
+      box-shadow:0 0 15px #ff00ff88; font-size:1rem; 
+    }
+
+    @media (max-width:400px) {
+      .radio-body { padding:2vh 0; }
+      .mode-btn { padding:0.3rem 0.7rem; font-size:0.65rem; }
+      .display-screen { height:60%; }
+      .logo-top-container { min-height:70px; padding:1vh 5%; }
+      .logo-top-container img { max-height:80px; }
+    }
+    @media (min-width:768px) {
+      .logo-top-container img { max-height:130px; }
+      .display-screen { height:45%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="radio-body" role="application">
+    <!-- LOGO PRINCIPAL -->
+    <div id="logoTopContainer" class="logo-top-container">☢️</div>
+
+    <!-- PANTALLA DEL REPRODUCTOR (aquí está el visualizador completo) -->
+    <div class="display-screen" id="screenBtn">
+      <canvas class="visualizer-canvas" id="vizCanvas"></canvas>
+      <div class="status-message" id="statusMessage">ACEPTA LOS TÉRMINOS PRIMERO</div>
+    </div>
+
+    <!-- BOTONES DE MODO -->
+    <div class="mode-selectors">
+      <button class="mode-btn active" id="btnMix">MiX</button>
+      <button class="mode-btn" id="btnPlaylist">SET</button>
+    </div>
+    
+    <!-- BOTÓN CAFÉ -->
+    <a class="paypal-btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=dlr.ruby@gmail.com&item_name=Donaci%C3%B3n+PsikodeliA+TeknoRadio&currency_code=EUR" target="_blank" rel="noopener noreferrer">☕</a>
+  </div>
+
+  <!-- MODAL LEGAL -->
+  <div class="legal-modal" id="legalModal">
+    <div class="legal-content">
+      <h2>PsykodeliA TeknoRadio™</h2>
+      <p>Usamos cookies técnicas para el reproductor.</p>
+      <p>Al continuar aceptas nuestra <a href="#">Política de Privacidad</a> y <a href="#">Términos de Uso</a>.</p>
+      <p>Si quieres puedes apoyar el proyecto ☕.</p>
+      <button class="legal-btn" id="acceptLegalBtn">Aceptar</button>
+    </div>
+  </div>
+
+  <script src="ap.js"></script>
+</body>
+</html>
