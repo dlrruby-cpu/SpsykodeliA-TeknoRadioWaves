@@ -1,10 +1,21 @@
 // ============================================================
-// MODAL LEGAL (CORREGIDO)
+// CONFIGURACIÓN DE PAYPAL PERSONAL
+// ============================================================
+const PAYPAL_USER_NAME = ':@DAVIDLOPEZDALOREX';
+
+// ============================================================
+// MODAL LEGAL
 // ============================================================
 (function() {
   const modal = document.getElementById('legalModal');
   const acceptBtn = document.getElementById('acceptLegalBtn');
   const statusMsg = document.getElementById('statusMessage');
+
+  // Asignar el enlace de PayPal automáticamente con tu usuario
+  const paypalLink = document.getElementById('paypalLink');
+  if (paypalLink) {
+    paypalLink.href = 'https://paypal.me/' + PAYPAL_USER_NAME;
+  }
 
   // Si ya aceptó, oculta modal
   if (localStorage.getItem('legalAccepted') === 'true') {
@@ -15,7 +26,7 @@
     return;
   }
 
-  // Mostrar modal (asegurarse)
+  // Mostrar modal
   modal.style.display = 'flex';
 
   // Evento aceptar
@@ -26,13 +37,12 @@
     modal.style.display = 'none';
     statusMsg.textContent = 'TOCA PARA EMPEZAR';
     console.log('✅ Términos aceptados');
-    // Si la radio ya está cargada, iniciar reproducción
     if (typeof startRadio === 'function' && tracks && tracks.length > 0) {
       startRadio();
     }
   });
 
-  // Enlaces de "leer términos" (evitan recarga y muestran aviso)
+  // Enlaces de términos
   document.getElementById('linkPrivacy').addEventListener('click', function(e) {
     e.preventDefault();
     alert('Política de privacidad: próximamente.');
@@ -63,7 +73,7 @@ const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp
 const LOGO_TOP_PATH = 'logo_top.png';
 
 // ============================================================
-// REPRODUCTOR (SIN CAMBIOS)
+// REPRODUCTOR DE AUDIO
 // ============================================================
 let audioCtx, tracks = [], currentIdx = -1, isPlaying = false, hasStarted = false;
 let gainA, gainB, sourceA, sourceB, activeGain = 'A', masterGain, mixTimer, analyser;
@@ -247,12 +257,12 @@ function switchMode(mode) {
   if (currentMode === mode || tracks.length === 0) return;
   currentMode = mode;
   btnMix.classList.toggle('active', mode === 'mix');
-  btnPlaylist.classList.toggle('active', mode === 'playlist');
+  btnPlaylist.classList.toggle('active', mode === 'set' || mode === 'playlist');
   if (isPlaying) { stopAll(); startRadio(); }
 }
 
 btnMix.addEventListener('click', e => { e.stopPropagation(); switchMode('mix'); });
-btnPlaylist.addEventListener('click', e => { e.stopPropagation(); switchMode('playlist'); });
+btnPlaylist.addEventListener('click', e => { e.stopPropagation(); switchMode('set'); });
 
 function handleFirstTouch(e) {
   if (document.getElementById('legalModal').style.display !== 'none') return;
@@ -273,7 +283,7 @@ document.body.addEventListener('click', handleFirstTouch);
 document.body.addEventListener('touchstart', handleFirstTouch);
 
 // ============================================================
-// VISUALIZADOR ORIGINAL COMPLETO (NO TOCADO)
+// VISUALIZADOR
 // ============================================================
 function drawVisualizer() {
   requestAnimationFrame(drawVisualizer);
