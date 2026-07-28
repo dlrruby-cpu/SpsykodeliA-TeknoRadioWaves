@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIGURACIÓN DE PAYPAL PERSONAL
 // ============================================================
-const PAYPAL_USER_NAME = ':@DAVIDLOPEZDALOREX';
+const PAYPAL_USER_NAME = 'DAVIDLOPEZDALOREX';
 
 // ============================================================
 // MODAL LEGAL
@@ -14,7 +14,7 @@ const PAYPAL_USER_NAME = ':@DAVIDLOPEZDALOREX';
   // Asignar el enlace de PayPal automáticamente con tu usuario
   const paypalLink = document.getElementById('paypalLink');
   if (paypalLink) {
-    paypalLink.href = 'https://paypal.me/' + PAYPAL_USER_NAME;
+    paypalLink.href = 'https://paypal.me/DAVIDLOPEZDALOREX';
   }
 
   // Si ya aceptó, oculta modal
