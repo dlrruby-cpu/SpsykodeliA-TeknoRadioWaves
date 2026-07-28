@@ -60,13 +60,13 @@
     .paypal-btn { 
       position:absolute; bottom:12px; left:12px; 
       background:rgba(255,255,255,0.08); color:#888; 
-      padding:4px 10px; border-radius:12px; text-decoration:none; 
-      font-size:0.6rem; border:1px solid rgba(255,255,255,0.15); 
+      padding:6px 12px; border-radius:12px; text-decoration:none; 
+      font-size:0.7rem; border:1px solid rgba(255,255,255,0.15); 
       z-index:25; letter-spacing:0.5px; cursor:pointer; 
     }
     .paypal-btn:hover { background:rgba(255,255,255,0.15); color:#ccc; }
 
-    /* MODAL LEGAL (visible por defecto, se oculta con JS) */
+    /* MODAL LEGAL */
     .legal-modal { 
       position:fixed; top:0; left:0; width:100%; height:100%; 
       background:rgba(0,0,0,0.95); z-index:1000; 
@@ -113,11 +113,11 @@
       <button class="mode-btn" id="btnPlaylist">SET</button>
     </div>
     
-    <!-- CAFÉ / PAYPAL -->
-    <a class="paypal-btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=dlr.ruby@gmail.com&item_name=Donaci%C3%B3n+PsikodeliA+TeknoRadio&currency_code=EUR" target="_blank">☕</a>
+    <!-- ENLACE DIRECTO A PAYPAL PERSONAL -->
+    <a class="paypal-btn" id="paypalLink" href="https://paypal.me/:@DAVIDLOPEZDALOREX" target="_blank" rel="noopener">☕ DONAR</a>
   </div>
 
-  <!-- MODAL LEGAL (se oculta vía JS) -->
+  <!-- MODAL LEGAL -->
   <div class="legal-modal" id="legalModal">
     <div class="legal-content">
       <h2>PsykodeliA TeknoRadio™</h2>
