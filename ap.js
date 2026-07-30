@@ -57,7 +57,7 @@ const PAYPAL_USER_NAME = 'DAVIDLOPEZDALOREX';
 // LISTA DE PISTAS
 // ============================================================
 const LOCAL_TRACKS = [
-  "track1_liveonthebeat_dalørex.mp3",
+  "track1_sends_dalorex.mp3",
   "track2_raveep1_psykodelialabtekno.mp3",
   "track3_fuckwarsep_zair.mp3",
   "track4_accionv1_psykodeliatkno.mp3",
@@ -67,6 +67,7 @@ const LOCAL_TRACKS = [
   "track8_expaciux_xailor.mp3",
   "track9_raveep1_psykodelialabtekno.mp3",
   "track10_Raveep1_psykodelialabtekno.mp3"
+  "track11_liveonthebeat_dalørex.mp3"
 ];
 
 const DEMO_TRACK = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
