@@ -63,7 +63,7 @@ const LOCAL_TRACKS = [
   "track4_free_dalorex.mp3",
   "track5_velocity_pskodeliateknowaves.mp3",
   "track6_healingfrequencys_psykodeliateknowaves.mp3",
-  "track7_Cuoredirave_Valmad.mp3",
+  "track7_spykødeliamixwaves2_dalørex_.mp3",
   "track8_expaciux_xailor.mp3",
   "track9_raveep1_psykodelialabtekno.mp3",
   "track10_Raveep1_psykodelialabtekno.mp3",
