@@ -57,7 +57,7 @@ const PAYPAL_USER_NAME = 'DAVIDLOPEZDALOREX';
 // LISTA DE PISTAS
 // ============================================================
 const LOCAL_TRACKS = [
-  "track1_sends_dalorex.mp3",
+  "track1_spykødeliamixwaves1_dalørex_.mp3",
   "track2_raveep1_psykodelialabtekno.mp3",
   "track3_fuckwarsep_zair.mp3",
   "track4_free_dalorex.mp3",
